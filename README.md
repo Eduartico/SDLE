@@ -1,6 +1,6 @@
 # Sistemas Distribuídos de Larga Escala
 * Short description: Repository containing the code developed in practical SDLE classes and the project
-* Tools: Python
+* Tools: Python, React
 * Institution: FEUP
 * Course: SDLE (Large-Scale Distributed Systemse)
 * Project grade: ?/20.0
