@@ -16,6 +16,8 @@ The application's local components, which are installed on user's devices, are e
 
 * Concurrency management is required to manage possible simultaneous updates of shopping lists by many users. To find the order of actions and settle disputes, the application first uses local clocks and the "Last-Writer-Wins" technique.
 
+![Last-Writer-Wins](diagrams/lww.png)
+
 Cloud Components:
 
 The cloud's component parts are essential to availability, scalability, and data synchronization among user's devices. These elements consist of:
@@ -25,6 +27,8 @@ The cloud's component parts are essential to availability, scalability, and data
 * Data Replication: Data replication is essential to maintaining shopping list's accessibility and consistency across several platforms. Currently, the program uses "Last-Writer-Wins" to resolve conflicts; however, in the future, Conflict-Free Replicated Data Types (CRDTs) will be implemented to improve conflict resolution.
 
 * Data Sharding: A data sharding approach is used to distribute shopping lists over several servers because each shopping list is independent, and the service is intended to serve millions of customers. This promotes scalability and reduces bottlenecks in data access.
+
+![CRDTs](diagrams/crdt.png)
 
 The architecture of the program is built to support a wide user base, provide high data availability, and facilitate effective user collaboration. Additionally, the design provides the development team with flexibility in selecting the programming languages, frameworks, and technologies that are used to construct the various components, enabling them to make decisions that are optimal for the demands of the project. The structure of the application plays a critical role in guaranteeing that users may reliably and efficiently access the functionalities of the local-first shopping list.
 
