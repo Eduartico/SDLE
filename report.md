@@ -6,7 +6,7 @@
 
 A key element of the project is the architecture of the local-first shopping list application, which establishes the general system architecture and the ways in which the local and cloud components interact to offer a seamless user experience.
 
-Local Components:
+### Local Components:
 
 The application's local components, which are installed on user's devices, are essential to its capacity to provide high availability, store data locally, and promote user collaboration. Among these elements are:
 
@@ -18,7 +18,7 @@ The application's local components, which are installed on user's devices, are e
 
 ![Last-Writer-Wins](diagrams/lww.png)
 
-Cloud Components:
+### Cloud Components:
 
 The cloud's component parts are essential to availability, scalability, and data synchronization among user's devices. These elements consist of:
 
