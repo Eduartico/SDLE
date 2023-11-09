@@ -49,6 +49,34 @@ The cloud's component parts are essential to availability, scalability, and data
 
 The architecture of the program is built to support a wide user base, provide high data availability, and facilitate effective user collaboration. Additionally, the design provides the development team with flexibility in selecting the programming languages, frameworks, and technologies that are used to construct the various components, enabling them to make decisions that are optimal for the demands of the project. The structure of the application plays a critical role in guaranteeing that users may reliably and efficiently access the functionalities of the local-first shopping list.
 
+# Technologies
+## Frontend
+### React
+- **Description:** React is a JavaScript library for building user interfaces. It allows us to create reusable UI components, making it ideal for building the frontend of our shopping list app.
+- **Key Features:**
+  - Component-based architecture
+  - Virtual DOM for efficient updates
+  - Rich ecosystem of libraries and tools
+
+## Backend
+### Python
+- **Description:** Python is a versatile and easy-to-read programming language. It will be the backbone of our backend, handling server-side logic and communication with the database.
+- **Key Features:**
+  - Clean and readable syntax
+  - Extensive standard library
+  - Widely used in web development
+
+### SQL (Structured Query Language)
+- **Description:** SQL is a domain-specific language for managing and manipulating relational databases. It will be crucial for storing and retrieving data related to user accounts, shopping lists, and more.
+- **Key Features:**
+  - Declarative syntax for querying databases
+  - ACID properties (Atomicity, Consistency, Isolation, Durability)
+  - Support for relational data modeling
+  
+### Database structure
+
+![Database Schema.jpg](diagrams/ClassesUML.jpg)
+
 # Pages
 
 Main pages of the application:
