@@ -1,3 +1,20 @@
+# Problem
+
+This project aims to build a shopping list application for a large group of users. It must offer offline access, real-time collaboration, and data synchronization between users, presenting challenges in concurrency, data consistency, scalability, and high availability.
+
+**Key Challenges:**
+
+1. **Local-First Shopping Lists:** Users need to create and manage lists on their devices, with offline functionality.
+
+2. **Collaborative Lists:** Users can share lists via unique IDs for concurrent editing by multiple users.
+
+3. **Concurrency and Consistency:** Handling conflicts when multiple users edit a list is crucial. Begin with Last-Writer-Wins and explore CRDTs.
+
+4. **High Availability and Scalability:** Ensure the architecture can scale for a large group of users without data bottlenecks.
+
+5. **Cloud-Based Data Management:** The cloud component provides data storage and synchronization for backup and sharing.
+
+
 # Architecture
 
 ## Link diagram: https://drive.google.com/file/d/1cf-vog9h5PJKpN2sgYrQ8YcekiizRRbt/view (ask permission)
@@ -32,3 +49,23 @@ The cloud's component parts are essential to availability, scalability, and data
 
 The architecture of the program is built to support a wide user base, provide high data availability, and facilitate effective user collaboration. Additionally, the design provides the development team with flexibility in selecting the programming languages, frameworks, and technologies that are used to construct the various components, enabling them to make decisions that are optimal for the demands of the project. The structure of the application plays a critical role in guaranteeing that users may reliably and efficiently access the functionalities of the local-first shopping list.
 
+# Pages
+
+Main pages of the application:
+
+| My Account Page| Create New Account | Login Page | 
+|---|---|---|
+|![My Account](pages/my_account.png) |![Create Account](pages/create_account.png)  | ![Login](pages/login.png)  | 
+
+| Shopping Lists Page | New Shopping List | Shopping List Page|
+|---|---|---|
+| ![Shopping Lists](pages/shopping_lists.png)| ![New Shopping List](pages/new_list.png)|![Shopping List](pages/shopping_list.png) |
+
+# Features
+
+- Create account and access profile
+- Login with email and password
+- Create new shopping list
+- Add items to shopping list
+- Delete items from shopping list
+- Mark items as bought
