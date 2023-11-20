@@ -1,0 +1,13 @@
+pip install Flask
+pip install flask-cors
+sudo apt install python3.10-venv
+python3 -m venv venv
+
+To run the server:
+    Windows:
+        venv\Scripts\activate
+        python3 app.py
+
+    Linux:
+        source venv/bin/activate
+        python3 app.py
