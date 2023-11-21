@@ -49,8 +49,7 @@ const List = () => {
 
   return (
     <div>
-      <h2>List Details</h2>
-      <h3>List Name: {list.name}</h3>
+      <h2>List Name: {list.name}</h2>
 
       <ul>
         {list.items.map((item) => (
