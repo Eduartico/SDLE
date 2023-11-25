@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const { login } = useAuth();
-  const history = useHistory(); 
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     await login(username, password);
+    navigate('/home'); // Redirect to the home page after successful login
   };
 
   return (

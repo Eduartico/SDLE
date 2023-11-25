@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import ApiService from '../services/ApiService';
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
   const login = async (username, password) => {
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
       const response = await ApiService.authenticateUser(username, password);
       setUser(response.data.user);
       
-      history.push('/'); 
+      navigate('/'); // Use navigate to redirect to the home page
     } catch (error) {
       console.error('Authentication failed:', error);
     }
