@@ -10,7 +10,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     await login(username, password);
-    navigate('/home'); // Redirect to the home page after successful login
+    navigate('/');
   };
 
   return (
