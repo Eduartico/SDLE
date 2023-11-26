@@ -23,21 +23,111 @@ def init_db():
             db.cursor().executescript(f.read())
         db.commit()
 
-@app.route('/api/data', methods=['GET'])
-def get_data():
+@app.route('/api/users', methods=['GET'])
+def get_users():
     db = get_db()
-    cursor = db.execute('SELECT * FROM data')
+    cursor = db.execute('SELECT * FROM User')
     data = cursor.fetchall()
-    return jsonify({'data': [dict(row) for row in data]})
+    return jsonify({'data': [dict(d) for d in data]})
 
-@app.route('/api/data', methods=['POST'])
-def post_data():
+
+def method_name():
+    pass
+@app.route('/api/lists', methods=['GET'])
+def get_lists():
+    db = get_db()
+    cursor = db.execute('SELECT * FROM List')
+    data = cursor.fetchall()
+    return jsonify({'data': [dict(d) for d in data]})
+
+@app.route('/api/list/<int:list_id>/items', methods=['GET'])
+def get_list_items(list_id):
+    db = get_db()
+    cursor = db.execute('SELECT * FROM ListItem WHERE ListId = ?', (list_id,))
+    data = cursor.fetchall()
+    return jsonify({'data': [dict(d) for d in data]})
+
+@app.route('/api/list/<int:list_id>/item/<int:item_id>', methods=['GET'])
+def get_list_item(list_id, item_id):
+    db = get_db()
+    cursor = db.execute('SELECT * FROM ListItem WHERE ListId = ? AND ItemId = ?', (list_id, item_id))
+    data = cursor.fetchone()
+    return jsonify({'data': dict(data)})
+
+@app.route('/api/user/<int:user_id>/lists', methods=['GET'])
+def get_user_lists(user_id):
+    db = get_db()
+    cursor = db.execute('SELECT * FROM ListUser WHERE UserId = ?', (user_id,))
+    data = cursor.fetchall()
+    return jsonify({'data': [dict(d) for d in data]})
+
+@app.route('/api/login', methods=['POST'])
+def login():
     req_data = request.get_json()
     db = get_db()
-    db.execute('INSERT INTO data (key, value) VALUES (?, ?)',
-               (req_data['key'], req_data['value']))
+    cursor = db.execute('SELECT * FROM User WHERE Username = ? AND Password = ?', (req_data['username'], req_data['password']))
+    data = cursor.fetchone()
+    if data is None:
+        return jsonify({'error': "Invalid username or password"})
+    return jsonify({'data': dict(data)})
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    req_data = request.get_json()
+    db = get_db()
+    cursor = db.execute('INSERT INTO User (Username, Email, Password) VALUES (?, ?, ?)', (req_data['username'], req_data['email'], req_data['password']))
     db.commit()
-    return jsonify({'message': 'Data received successfully'})
+    return jsonify({'data': {'user_id': cursor.lastrowid}})
+
+@app.route('/api/addList', methods=['POST'])
+def add_list():
+    req_data = request.get_json()
+    db = get_db()
+    cursor = db.execute('INSERT INTO List (Name, IsRecipe) VALUES (?, ?)', (req_data['name'], req_data['isRecipe']))
+    cursor = db.execute('INSERT INTO ListUser (ListId, UserId) VALUES (?,?)', (cursor.lastrowid, req_data['userId']))
+    db.commit()
+    return jsonify({'data': {'list_id': cursor.lastrowid}})
+
+@app.route('/api/addListItem', methods=['POST'])
+def add_list_item():
+    req_data = request.get_json()
+    db = get_db()
+    cursor = db.execute('INSERT INTO ListItem (ListId, Name, Quantity, BoughtQuantity) VALUES (?, ?, ?, ?)', (req_data['listId'], req_data['name'], req_data['quantity'], req_data['boughtQuantity']))
+    db.commit()
+    return jsonify({'data': {'item_id': cursor.lastrowid}})
+
+@app.route('/api/updateList', methods=['PUT'])
+def update_list():
+    req_data = request.get_json()
+    db = get_db()
+    cursor = db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?', (req_data['name'], req_data['isRecipe'], req_data['listId']))
+    db.commit()
+    return jsonify({'data': {'list_id': cursor.lastrowid}})
+
+@app.route('/api/updateListItem', methods=['PUT'])
+def update_list_item():
+    req_data = request.get_json()
+    db = get_db()
+    cursor = db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?', (req_data['name'], req_data['quantity'], req_data['boughtQuantity'], req_data['itemId']))
+    db.commit()
+    return jsonify({'data': {'item_id': cursor.lastrowid}})
+
+@app.route('/api/deleteListItem', methods=['DELETE'])
+def delete_list_item():
+    req_data = request.get_json()
+    db = get_db()
+    cursor = db.execute('DELETE FROM ListItem WHERE ItemId = ?', (req_data['itemId'],))
+    db.commit()
+    return jsonify({'data': {'item_id': cursor.lastrowid}})
+
+@app.route('/api/deleteList', methods=['DELETE'])
+def delete_list():
+    req_data = request.get_json()
+    db = get_db()
+    cursor = db.execute('DELETE FROM List WHERE ListId = ?', (req_data['listId'],))
+    db.commit()
+    return jsonify({'data': {'list_id': cursor.lastrowid}})
+
 
 if __name__ == '__main__':
     with app.app_context():

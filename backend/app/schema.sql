@@ -1,19 +1,19 @@
 CREATE TABLE User (
-    UserId INT PRIMARY KEY,
+    UserId INTEGER PRIMARY KEY AUTOINCREMENT,
     Username VARCHAR(255),
     Email VARCHAR(255),
     Password VARCHAR(255)
 );
 
 CREATE TABLE List (
-    ListId INT PRIMARY KEY,
+    ListId INTEGER PRIMARY KEY AUTOINCREMENT,
     Name VARCHAR(255),
     IsRecipe BOOLEAN
 );
 
 CREATE TABLE ListItem (
-    ItemId INT PRIMARY KEY,
-    ListId INT,
+    ItemId INTEGER PRIMARY KEY AUTOINCREMENT,
+    ListId INTEGER,
     Name VARCHAR(255),
     Quantity INT,
     BoughtQuantity INT,
@@ -21,8 +21,8 @@ CREATE TABLE ListItem (
 );
 
 CREATE TABLE ListUser (
-    ListId INT,
-    UserId INT,
+    ListId INTEGER,
+    UserId INTEGER,
     PRIMARY KEY (ListId, UserId),
     FOREIGN KEY (ListId) REFERENCES List(ListId),
     FOREIGN KEY (UserId) REFERENCES User(UserId)
