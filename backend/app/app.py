@@ -4,6 +4,8 @@ from flask_cors import CORS
 import sqlite3
 import os
 
+CURRENT_USER = None
+
 app = Flask(__name__)
 PORT = 5000  # Set port here
 app.config['DATABASE'] = f'database_{PORT}.db'
@@ -61,17 +63,24 @@ def get_user_lists(user_id):
     data = cursor.fetchall()
     return jsonify({'data': [dict(d) for d in data]})
 
-@app.route('/api/login', methods=['POST'])
+@app.route('/api/user/current', methods=['GET'])
+def get_current_user():
+    if CURRENT_USER is None:
+        return jsonify({'data': "No user logged in"})
+    return jsonify({'data': {"user_id": CURRENT_USER}})
+
+@app.route('/api/auth/login', methods=['POST'])
 def login():
     req_data = request.get_json()
     db = get_db()
     cursor = db.execute('SELECT * FROM User WHERE Username = ? AND Password = ?', (req_data['username'], req_data['password']))
     data = cursor.fetchone()
     if data is None:
-        return jsonify({'error': "Invalid username or password"})
+        return jsonify({'data': "Invalid username or password"})
+    CURRENT_USER = data['UserId']
     return jsonify({'data': dict(data)})
 
-@app.route('/api/register', methods=['POST'])
+@app.route('/api/auth/register', methods=['POST'])
 def register():
     req_data = request.get_json()
     db = get_db()
