@@ -13,6 +13,7 @@ const ApiService = {
   },
 
   getUserLists: async (userId) => {
+    console.log(userId);
     const response = await axios.get(`${BASE_URL}/user/${userId}/lists`); // TO DO TROCAR ENDPOINT
     return response.data;
   },
