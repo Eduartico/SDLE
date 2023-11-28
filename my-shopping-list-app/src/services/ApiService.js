@@ -18,6 +18,11 @@ const ApiService = {
     return response.data;
   },
 
+  getListById: async (listId) => {
+    const response = await axios.get(`${BASE_URL}/list/${listId}`);
+    return response.data;
+  }
+
 };
 
 export default ApiService;

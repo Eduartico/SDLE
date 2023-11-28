@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
       navigate('/'); // Use navigate to redirect to the home page
     } catch (error) {
       console.error('Authentication failed:', error);
+      navigate('/login');
     }
   };
 

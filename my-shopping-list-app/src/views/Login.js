@@ -10,7 +10,6 @@ const Login = () => {
 
   const handleLogin = async () => {
     await login(username, password);
-    navigate('/');
   };
 
   return (

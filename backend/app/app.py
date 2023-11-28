@@ -1,10 +1,17 @@
 from flask import Flask, jsonify, request, g
+from flask import abort, render_template, request
 from flask import send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
 
-CURRENT_USER = 1
+CURRENT_USER = {
+        'user': {
+            'id': 1,
+            'username': "user1",
+            'email': "user1@gmail.com"
+        }
+    }
 
 app = Flask(__name__)
 PORT = 5000  # Set port here
@@ -32,15 +39,35 @@ def get_users():
     data = cursor.fetchall()
     return jsonify({'data': [dict(d) for d in data]})
 
-
-def method_name():
-    pass
 @app.route('/api/lists', methods=['GET'])
 def get_lists():
     db = get_db()
     cursor = db.execute('SELECT * FROM List')
     data = cursor.fetchall()
     return jsonify({'data': [dict(d) for d in data]})
+
+@app.route('/api/list/<int:list_id>', methods=['GET'])
+def get_list(list_id):
+    db = get_db()
+    cursor = db.execute('SELECT * FROM List WHERE ListId = ?', (list_id,))
+    data = cursor.fetchone()
+    if (data is None): abort(404)
+    cursor = db.execute('SELECT * FROM ListItem WHERE ListId = ?', (list_id,))
+    items = cursor.fetchall()
+    data = {
+        'list': {
+            'id': data['ListId'],
+            'name': data['Name'],
+            'isRecipe': data['IsRecipe'],
+            'items' : [{
+                'id': d['ItemId'],
+                'name': d['Name'],
+                'quantity': d['Quantity'],
+                'boughtQuantity': d['BoughtQuantity']
+                } for d in items]
+        }
+    }
+    return jsonify({'data': data})
 
 @app.route('/api/list/<int:list_id>/items', methods=['GET'])
 def get_list_items(list_id):
@@ -54,20 +81,28 @@ def get_list_item(list_id, item_id):
     db = get_db()
     cursor = db.execute('SELECT * FROM ListItem WHERE ListId = ? AND ItemId = ?', (list_id, item_id))
     data = cursor.fetchone()
+    if (data is None): abort(404)
     return jsonify({'data': dict(data)})
 
 @app.route('/api/user/<int:user_id>/lists', methods=['GET'])
 def get_user_lists(user_id):
     db = get_db()
-    cursor = db.execute('SELECT * FROM ListUser WHERE UserId = ?', (user_id,))
+    cursor = db.execute('SELECT * FROM List WHERE ListId IN (SELECT ListId FROM ListUser WHERE UserId = ?)', (user_id,))
     data = cursor.fetchall()
-    return jsonify({'data': {"lists" : [{"id": d['ListId'], "user_id" : d['UserId']} for d in data]}})
+    data = {
+        'lists': [{
+            'id': d['ListId'],
+            'name': d['Name'],
+            'isRecipe': d['IsRecipe']
+        } for d in data]
+    }
+    return jsonify({'data': data})
 
 @app.route('/api/user/current', methods=['GET'])
 def get_current_user():
     if CURRENT_USER is None:
         return jsonify({'data': "No user logged in"})
-    return jsonify({'data': {"user": {"id": CURRENT_USER}}})
+    return jsonify({'data': CURRENT_USER})
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
@@ -75,10 +110,19 @@ def login():
     db = get_db()
     cursor = db.execute('SELECT * FROM User WHERE Username = ? AND Password = ?', (req_data['username'], req_data['password']))
     data = cursor.fetchone()
-    if data is None:
-        return jsonify({'data': "Invalid username or password"})
-    CURRENT_USER = data['UserId']
-    return jsonify({'data': dict(data)})
+    if data is None: abort(404)
+    data = {
+        'user': {
+            'id': data['UserId'],
+            'username': data['Username'],
+            'email': data['Email']
+        }
+    }
+    CURRENT_USER = data['user']
+
+    response = jsonify({'data': data})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():
