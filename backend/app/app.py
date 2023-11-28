@@ -1,22 +1,27 @@
 from flask import Flask, jsonify, request, g
 from flask import abort, render_template, request
-from flask import send_from_directory
+from flask import session
 from flask_cors import CORS
+from flask_session.__init__ import Session
+from threading import Lock
+
 import sqlite3
 import os
-
-CURRENT_USER = {
-        'user': {
-            'id': 1,
-            'username': "user1",
-            'email': "user1@gmail.com"
-        }
-    }
 
 app = Flask(__name__)
 PORT = 5000  # Set port here
 app.config['DATABASE'] = f'database_{PORT}.db'
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+
 CORS(app)
+Session(app)
+
+
+state_lock = Lock()
+username = None
+user_id = None
 
 
 def get_db():
@@ -100,9 +105,20 @@ def get_user_lists(user_id):
 
 @app.route('/api/user/current', methods=['GET'])
 def get_current_user():
-    if CURRENT_USER is None:
-        return jsonify({'data': "No user logged in"})
-    return jsonify({'data': CURRENT_USER})
+    global username
+    global user_id
+    with state_lock:
+        if username is None or user_id is None:
+            abort(404)
+        data = {
+            'user': {
+                'username': username,
+                'id': user_id
+            }
+        }
+        response = jsonify({'data': data})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
@@ -110,7 +126,13 @@ def login():
     db = get_db()
     cursor = db.execute('SELECT * FROM User WHERE Username = ? AND Password = ?', (req_data['username'], req_data['password']))
     data = cursor.fetchone()
-    if data is None: abort(404)
+    global username
+    global user_id
+    with state_lock:
+        if data is None:
+            abort(404)
+        username = data['Username']
+        user_id = data['UserId']
     data = {
         'user': {
             'id': data['UserId'],
@@ -118,8 +140,9 @@ def login():
             'email': data['Email']
         }
     }
-    CURRENT_USER = data['user']
-
+    with state_lock:
+        username = data['user']['username']
+        user_id = data['user']['id']
     response = jsonify({'data': data})
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
@@ -184,6 +207,12 @@ def delete_list():
 
 if __name__ == '__main__':
     with app.app_context():
+        try:
+            g.username
+            g.user_id
+        except:
+            g.username = None
+            g.user_id = None
         if not os.path.exists(app.config['DATABASE']):
             init_db()
     app.run(debug=True, port=PORT)
@@ -198,3 +227,5 @@ if __name__ == '__main__':
 # @app.route('/static/<file>', methods=['GET'])
 # def serve_static(file):
 #     return send_from_directory('../react-app/build/static', file)
+
+# set the secret key.  keep this really secret:
