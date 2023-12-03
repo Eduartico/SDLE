@@ -103,23 +103,6 @@ def get_user_lists(user_id):
     }
     return jsonify({'data': data})
 
-@app.route('/api/user/current', methods=['GET'])
-def get_current_user():
-    global username
-    global user_id
-    with state_lock:
-        if username is None or user_id is None:
-            abort(404)
-        data = {
-            'user': {
-                'username': username,
-                'id': user_id
-            }
-        }
-        response = jsonify({'data': data})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-
 @app.route('/api/auth/login', methods=['POST'])
 def login():
     req_data = request.get_json()
@@ -144,8 +127,27 @@ def login():
         username = data['user']['username']
         user_id = data['user']['id']
     response = jsonify({'data': data})
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    # Remove the following line
+    # response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
+@app.route('/api/user/current', methods=['GET'])
+def get_current_user():
+    global username
+    global user_id
+    with state_lock:
+        if username is None or user_id is None:
+            abort(404)
+        data = {
+            'user': {
+                'username': username,
+                'id': user_id
+            }
+        }
+        response = jsonify({'data': data})
+        # Remove the following line
+        # response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
 @app.route('/api/auth/register', methods=['POST'])
 def register():

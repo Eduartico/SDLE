@@ -1,15 +1,23 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000/api'; // TO DO TROCAR URL 
+const BASE_URL = 'http://localhost:5000'; // TO DO TROCAR URL 
 const ApiService = {
   authenticateUser: async (username, password) => {
-    const response = await axios.post(`${BASE_URL}/auth/login`, { username, password });
-    return response.data;
+    try {
+      const response = await axios.post(`${BASE_URL}/auth/login`, { username, password });
+      return response.data;
+    } catch (error) {
+      throw error; // Allow the component to handle the error
+    }
   },
 
   getCurrentUser: async () => {
-    const response = await axios.get(`${BASE_URL}/user/current`); // TO DO TROCAR ENDPOINT
-    return response.data;
+    try {
+      const response = await axios.get(`${BASE_URL}/user/current`);
+      return response.data;
+    } catch (error) {
+      throw error; // Allow the component to handle the error
+    }
   },
 
   getUserLists: async (userId) => {

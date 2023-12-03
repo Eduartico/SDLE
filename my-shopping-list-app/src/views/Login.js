@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ApiService from '../services/ApiService';
 
 const Login = () => {
   const { login } = useAuth();
@@ -9,7 +10,15 @@ const Login = () => {
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-    await login(username, password);
+    try {
+      const userData = await ApiService.authenticateUser(username, password);
+
+      login(userData);
+
+      navigate('/');
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   return (

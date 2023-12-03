@@ -31,7 +31,9 @@ CREATE TABLE ListUser (
 -- Povoar users
 INSERT INTO User (UserId, Username, Email, Password) VALUES
 (1, 'user1', 'user1@example.com', 'password1'),
-(2, 'user2', 'user2@example.com', 'password2');
+(2, 'user2', 'user2@example.com', 'password2'),
+(3, 'a', 'a', 'a');
+
 
 -- Povoar listas
 INSERT INTO List (ListId, Name, IsRecipe) VALUES
