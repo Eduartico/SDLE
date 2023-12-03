@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
       const response = await ApiService.authenticateUser(username, password);
       setUser(response.data.user);
       
-      navigate('/'); // Use navigate to redirect to the home page
+      navigate('/');  
     } catch (error) {
       console.error('Authentication failed:', error);
       navigate('/login');
