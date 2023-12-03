@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom'; 
 import ApiService from '../services/ApiService';
+import sidebarIcon from '../icons/sidebar.png';
+import BottomAppBar from '../components/BottomAppBar';
 
 const Home = () => {
   const [user, setUser] = useState(null);
@@ -35,7 +37,7 @@ const Home = () => {
       <div style={{ position: 'fixed', top: '10px', left: '10px', cursor: 'pointer' }}>
         <button onClick={() => console.log('Open Sidebar')}>
           <img
-            src="sidebar.png"  //TO DO TROCAR ICONE
+            src={sidebarIcon}  //TO DO TROCAR ICONE
             alt="Sidebar Icon"
             style={{ width: '30px', height: '30px' }}
           />
@@ -58,7 +60,7 @@ const Home = () => {
       </div>
 
       <div style={{ position: 'fixed', bottom: 0, left: 0, width: '100%', background: '#f0f0f0', padding: '10px' }}>
-        TO DO BOTTOM BAR.
+        {BottomAppBar}
       </div>
     </div>
   );

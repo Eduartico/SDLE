@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+
+.bottom-app-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff; 
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  border-top: 1px solid #ccc; 
+}
+
+.bottom-app-bar a {
+  text-decoration: none;
+  color: #333; 
+}
