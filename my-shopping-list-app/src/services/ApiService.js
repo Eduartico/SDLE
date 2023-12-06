@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000'; // TO DO TROCAR URL 
+const BASE_URL = 'http://localhost:5000/api'; // TO DO TROCAR URL 
 const ApiService = {
   authenticateUser: async (username, password) => {
     try {

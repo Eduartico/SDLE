@@ -12,12 +12,8 @@ app = Flask(__name__)
 PORT = 5000  # Set port here
 app.config['DATABASE'] = f'database_{PORT}.db'
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
 
 CORS(app)
-Session(app)
-
 
 state_lock = Lock()
 username = None
@@ -128,7 +124,7 @@ def login():
         user_id = data['user']['id']
     response = jsonify({'data': data})
     # Remove the following line
-    # response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 @app.route('/api/user/current', methods=['GET'])
@@ -146,7 +142,7 @@ def get_current_user():
         }
         response = jsonify({'data': data})
         # Remove the following line
-        # response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
 @app.route('/api/auth/register', methods=['POST'])

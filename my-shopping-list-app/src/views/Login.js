@@ -11,9 +11,9 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const userData = await ApiService.authenticateUser(username, password);
+      //const userData = await ApiService.authenticateUser(username, password);
 
-      login(userData);
+      login(username, password);
 
       navigate('/');
     } catch (error) {
