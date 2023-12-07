@@ -53,7 +53,7 @@ const Home = () => {
   };
 
   return (
-    <div>
+    <div style={{ padding: '20px' }}>
       {loading && <p>Loading...</p>}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -76,14 +76,17 @@ const Home = () => {
 
       <Button
         variant="danger"
-        className="position-fixed bottom-3 end-3"
+        className="position-fixed bottom-5 end-5 z-index-1"
+        style={{ bottom: "10%", left: "85%" }}
         onClick={() => setIsAddListModalOpen(true)}
       >
         +
       </Button>
 
-      {/* Add List Modal */}
-      <Modal show={isAddListModalOpen} onHide={() => setIsAddListModalOpen(false)}>
+      <Modal
+        show={isAddListModalOpen}
+        onHide={() => setIsAddListModalOpen(false)}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Add New List</Modal.Title>
         </Modal.Header>
@@ -109,18 +112,22 @@ const Home = () => {
                 required
               />
             </label>
+            <div>
+              <Button variant="danger" type="submit" className="mt-3">
+                Add List
+              </Button>
+            </div>
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" type="submit">
-              Add List
-          </Button>
-          <Button variant="secondary" onClick={() => setIsAddListModalOpen(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setIsAddListModalOpen(false)}
+          >
             Close
           </Button>
         </Modal.Footer>
       </Modal>
-
       <div className="position-fixed bottom-0 start-0 w-100 bg-light p-2">
         <BottomAppBar />
       </div>
