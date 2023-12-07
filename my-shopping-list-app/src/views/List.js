@@ -59,6 +59,7 @@ const List = () => {
   const handleAddItem = (e) => {
     e.preventDefault();
     const newItem = {
+      id: Math.random().toString(),  // THIS SHOULD BE DONE BY BACKEND 
       name: newItemName,
       quantity: newItemQuantity,
       boughtQuantity: 0,

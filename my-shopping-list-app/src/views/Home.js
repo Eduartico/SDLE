@@ -9,6 +9,9 @@ const Home = () => {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [newListName, setNewListName] = useState('');
+  const [newListUsernames, setNewListUsernames] = useState('');
+  const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,24 +35,24 @@ const Home = () => {
     fetchData();
   }, []);
 
+  const handleAddList = (e) => {
+    e.preventDefault();
+
+    const newList = {
+      id: Math.random().toString(),  // THIS SHOULD BE DONE BY BACKEND 
+      name: newListName,
+      usernames: newListUsernames.split(',').map(username => username.trim()),
+    };
+
+    setLists((prevLists) => [...prevLists, newList]);
+
+    setIsAddListModalOpen(false);
+    setNewListName('');
+    setNewListUsernames('');
+  };
+
   return (
-    <div>{/*
-      <div
-        style={{
-          position: "fixed",
-          top: "10px",
-          left: "10px",
-          cursor: "pointer",
-        }}
-      >
-        <button onClick={() => console.log("Open Sidebar")}>
-          <img
-            src={sidebarIcon}
-            alt="Sidebar Icon"
-            style={{ width: "30px", height: "30px" }}
-          />
-        </button>
-      </div>*/}
+    <div>
 
       {loading && <p>Loading...</p>}
 
@@ -65,6 +68,55 @@ const Home = () => {
           ))}
         </ul>
       </div>
+      <button
+        style={{ position: 'fixed', bottom: '70px', right: '10px', cursor: 'pointer' }}
+        onClick={() => setIsAddListModalOpen(true)}
+      >
+        +
+      </button>
+
+      {/* Add List Modal */}
+      {isAddListModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+            zIndex: 9999,
+          }}
+        >
+          <h3>Add New List</h3>
+          <form onSubmit={handleAddList}>
+            <label>
+              List Name:
+              <input
+                type="text"
+                value={newListName}
+                onChange={(e) => setNewListName(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Usernames (comma-separated):
+              <input
+                type="text"
+                value={newListUsernames}
+                onChange={(e) => setNewListUsernames(e.target.value)}
+                required
+              />
+            </label>
+            <button type="button" onClick={handleAddList}>
+              Add List
+            </button>
+          </form>
+          <button onClick={() => setIsAddListModalOpen(false)}>Close</button>
+        </div>
+      )}
 
       <div
         style={{
