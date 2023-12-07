@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import ApiService from '../services/ApiService';
-import { Form, Button } from 'react-bootstrap';
-
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import ApiService from "../services/ApiService";
+import { Form, Button } from "react-bootstrap";
 
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
@@ -17,14 +16,14 @@ const Login = () => {
 
       login(username, password);
 
-      navigate('/home');
+      navigate("/home");
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     }
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: "20px" }}>
       <h2>Login</h2>
       <Form>
         <Form.Group className="mb-3" controlId="formUsername">

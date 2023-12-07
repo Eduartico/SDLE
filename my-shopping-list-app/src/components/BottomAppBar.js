@@ -5,8 +5,8 @@ import { Home, Restaurant, AccountCircle } from "@mui/icons-material";
 
 const BottomAppBar = () => {
   return (
-    <div class="center">
-      <Container fluid style={{ padding: "10px" }}>
+    <div>
+      <Container fluid style={{ background: "gray", padding: "10px" }}>
         <Row className="justify-content-center align-items-center">
           <Col className="text-center">
             <Link to="/home">

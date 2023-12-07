@@ -59,15 +59,7 @@ const Profile = () => {
 
         <Row>
           <Col>
-            <div
-              className="position-fixed bottom-0 start-0 w-100 bg-light p-2"
-              style={{
-                position: "fixed",
-                bottom: 0,
-                left: 0,
-                width: "100%",
-              }}
-            >
+            <div className="position-fixed bottom-0 start-0 w-100">
               <BottomAppBar />
             </div>
           </Col>
