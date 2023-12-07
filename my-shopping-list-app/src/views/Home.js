@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ApiService from "../services/ApiService";
-import sidebarIcon from "../icons/sidebar.png";
+import { Button, ListGroup, Modal } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 import BottomAppBar from "../components/BottomAppBar";
 
 const Home = () => {
@@ -9,8 +10,8 @@ const Home = () => {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [newListName, setNewListName] = useState('');
-  const [newListUsernames, setNewListUsernames] = useState('');
+  const [newListName, setNewListName] = useState("");
+  const [newListUsernames, setNewListUsernames] = useState("");
   const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
 
   useEffect(() => {
@@ -39,63 +40,60 @@ const Home = () => {
     e.preventDefault();
 
     const newList = {
-      id: Math.random().toString(),  // THIS SHOULD BE DONE BY BACKEND 
+      id: Math.random().toString(),
       name: newListName,
-      usernames: newListUsernames.split(',').map(username => username.trim()),
+      usernames: newListUsernames.split(",").map((username) => username.trim()),
     };
 
     setLists((prevLists) => [...prevLists, newList]);
 
     setIsAddListModalOpen(false);
-    setNewListName('');
-    setNewListUsernames('');
+    setNewListName("");
+    setNewListUsernames("");
   };
 
   return (
     <div>
-
       {loading && <p>Loading...</p>}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <div>
+      <div className="mt-4">
         <h2>Your Shopping Lists</h2>
-        <ul>
+        <ListGroup>
           {lists.map((list) => (
-            <li key={list.id}>
-              <Link to={`/list/${list.id}`}>{list.name}</Link>
-            </li>
+            <ListGroup.Item
+              key={list.id}
+              as={Link}
+              to={`/list/${list.id}`}
+              action
+            >
+              {list.name}
+            </ListGroup.Item>
           ))}
-        </ul>
+        </ListGroup>
       </div>
-      <button
-        style={{ position: 'fixed', bottom: '70px', right: '10px', cursor: 'pointer' }}
+
+      <Button
+        variant="danger"
+        className="position-fixed bottom-3 end-3"
         onClick={() => setIsAddListModalOpen(true)}
       >
         +
-      </button>
+      </Button>
 
       {/* Add List Modal */}
-      {isAddListModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-            zIndex: 9999,
-          }}
-        >
-          <h3>Add New List</h3>
+      <Modal show={isAddListModalOpen} onHide={() => setIsAddListModalOpen(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add New List</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
           <form onSubmit={handleAddList}>
             <label>
               List Name:
               <input
                 type="text"
+                className="form-control"
                 value={newListName}
                 onChange={(e) => setNewListName(e.target.value)}
                 required
@@ -105,29 +103,25 @@ const Home = () => {
               Usernames (comma-separated):
               <input
                 type="text"
+                className="form-control"
                 value={newListUsernames}
                 onChange={(e) => setNewListUsernames(e.target.value)}
                 required
               />
             </label>
-            <button type="button" onClick={handleAddList}>
-              Add List
-            </button>
           </form>
-          <button onClick={() => setIsAddListModalOpen(false)}>Close</button>
-        </div>
-      )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" type="submit">
+              Add List
+          </Button>
+          <Button variant="secondary" onClick={() => setIsAddListModalOpen(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-      <div
-        style={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          width: "100%",
-          background: "#f0f0f0",
-          padding: "10px",
-        }}
-      >
+      <div className="position-fixed bottom-0 start-0 w-100 bg-light p-2">
         <BottomAppBar />
       </div>
     </div>
