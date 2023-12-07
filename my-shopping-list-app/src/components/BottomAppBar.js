@@ -1,24 +1,30 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import HomeIcon from "@mui/icons-material/Home";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { Container, Row, Col } from "react-bootstrap";
+import { Home, Restaurant, AccountCircle } from "@mui/icons-material";
 
 const BottomAppBar = () => {
   return (
-    <div
-      className="bottom-app-bar"
-      style={{ display: "flex", justifyContent: "space-around" }}
-    >
-      <Link to="/home">
-        <HomeIcon fontSize="large" />
-      </Link>
-      <Link to="/recipes">
-        <RestaurantIcon fontSize="large" />
-      </Link>
-      <Link to="/profile">
-        <AccountCircleIcon fontSize="large" />
-      </Link>
+    <div class="center">
+      <Container fluid style={{ padding: "10px" }}>
+        <Row className="justify-content-center align-items-center">
+          <Col className="text-center">
+            <Link to="/home">
+              <Home fontSize="large" style={{ color: "white" }} />
+            </Link>
+          </Col>
+          <Col className="text-center">
+            <Link to="/recipes">
+              <Restaurant fontSize="large" style={{ color: "white" }} />
+            </Link>
+          </Col>
+          <Col className="text-center">
+            <Link to="/profile">
+              <AccountCircle fontSize="large" style={{ color: "white" }} />
+            </Link>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 };

@@ -53,7 +53,7 @@ const Home = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div style={{ padding: "20px" }}>
       {loading && <p>Loading...</p>}
 
       {error && <p style={{ color: "red" }}>{error}</p>}
@@ -77,7 +77,7 @@ const Home = () => {
       <Button
         variant="danger"
         className="position-fixed bottom-5 end-5 z-index-1"
-        style={{ bottom: "10%", left: "85%" }}
+        style={{ bottom: "13%", left: "85%" }}
         onClick={() => setIsAddListModalOpen(true)}
       >
         +

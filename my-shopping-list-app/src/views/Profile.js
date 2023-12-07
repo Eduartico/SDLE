@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Avatar, Typography } from "@mui/material";
+import { Container, Row, Col, Image } from "react-bootstrap";
 import ApiService from "../services/ApiService";
 import BottomAppBar from "../components/BottomAppBar";
 
@@ -25,40 +25,54 @@ const Profile = () => {
   }, []);
 
   return (
-    <div>
-      <div>
-        <h2>Profile</h2>
+    <div style={{ padding: "20px" }}>
+      <Container style={{ padding: "20px" }}>
+        <Row>
+          <Col>
+            <h2>Profile</h2>
 
-        {loading && <p>Loading...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+            {loading && <p>Loading...</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
 
-        {user && (
-          <div>
-            {user.photo ? (
-              <Avatar
-                alt={user.name}
-                src={user.photo}
-                sx={{ width: 100, height: 100 }}
-              />
-            ) : (
-              <Avatar sx={{ width: 100, height: 100 }}>{user.name && user.name[0]}</Avatar>
+            {user && (
+              <div>
+                {user.photo ? (
+                  <Image
+                    src={user.photo}
+                    alt={user.name}
+                    roundedCircle
+                    className="mb-3"
+                  />
+                ) : (
+                  <Image
+                    src="https://via.placeholder.com/100" // Placeholder image URL
+                    alt={user.name}
+                    roundedCircle
+                    className="mb-3"
+                  />
+                )}
+                <h5>{user.name}</h5>
+              </div>
             )}
-            <Typography variant="h5">{user.name}</Typography>
-          </div>
-        )}
-        <div
-          style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            background: "#f0f0f0",
-            padding: "10px",
-          }}
-        >
-          <BottomAppBar />
-        </div>
-      </div>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col>
+            <div
+              className="position-fixed bottom-0 start-0 w-100 bg-light p-2"
+              style={{
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                width: "100%",
+              }}
+            >
+              <BottomAppBar />
+            </div>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 };
