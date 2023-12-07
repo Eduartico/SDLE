@@ -8,6 +8,9 @@ const List = () => {
   const [list, setList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemQuantity, setNewItemQuantity] = useState(1);
+  const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchList = async () => {
@@ -53,6 +56,18 @@ const List = () => {
     });
   };
 
+  const handleAddItem = (e) => {
+    e.preventDefault();
+    const newItem = {
+      name: newItemName,
+      quantity: newItemQuantity,
+      boughtQuantity: 0,
+    };
+    setList((prevList) => ({ ...prevList, items: [...prevList.items, newItem] }));
+    setNewItemName('');
+    setNewItemQuantity(1);
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -63,7 +78,7 @@ const List = () => {
 
   return (
     <div>
-      <h2>List Name: {list.name}</h2>
+      <h2>{list.name}</h2>
 
       <h3>Done</h3>
       <ul>
@@ -163,14 +178,62 @@ const List = () => {
             </li>
           ))}
       </ul>
+      <button
+        style={{ position: 'fixed', bottom: '70px', right: '10px', cursor: 'pointer' }}
+        onClick={() => setIsAddItemModalOpen(true)}
+      >
+        +
+      </button>
+
+      {/* Add Item Modal */}
+      {isAddItemModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'white',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+            zIndex: 9999,
+          }}
+        >
+          <h3>Add New Item</h3>
+          <form onSubmit={handleAddItem}>
+            <label>
+              Name:
+              <input
+                type="text"
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Quantity:
+              <input
+                type="number"
+                value={newItemQuantity}
+                onChange={(e) => setNewItemQuantity(parseInt(e.target.value, 10))}
+                min="1"
+                required
+              />
+            </label>
+            <button type="submit">Add Item</button>
+          </form>
+          <button onClick={() => setIsAddItemModalOpen(false)}>Close</button>
+        </div>
+      )}
       <div
         style={{
-          position: 'fixed',
+          position: "fixed",
           bottom: 0,
           left: 0,
-          width: '100%',
-          background: '#f0f0f0',
-          padding: '10px',
+          width: "100%",
+          background: "#f0f0f0",
+          padding: "10px",
         }}
       >
         <BottomAppBar />
