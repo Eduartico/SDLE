@@ -12,8 +12,8 @@ const App = () => {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/list/:listId" element={<List />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/recipes" element={<Recipes />} />

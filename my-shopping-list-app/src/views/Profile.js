@@ -41,7 +41,7 @@ const Profile = () => {
                 sx={{ width: 100, height: 100 }}
               />
             ) : (
-              <Avatar sx={{ width: 100, height: 100 }}>{user.name[0]}</Avatar>
+              <Avatar sx={{ width: 100, height: 100 }}>{user.name && user.name[0]}</Avatar>
             )}
             <Typography variant="h5">{user.name}</Typography>
           </div>

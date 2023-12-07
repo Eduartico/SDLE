@@ -13,10 +13,10 @@ export const AuthProvider = ({ children }) => {
       const response = await ApiService.authenticateUser(username, password);
       setUser(response.data.user);
       
-      navigate('/');  
+      navigate('/home');  
     } catch (error) {
       console.error('Authentication failed:', error);
-      navigate('/login');
+      //navigate('/');
     }
   };
 

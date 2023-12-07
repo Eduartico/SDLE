@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ApiService from '../services/ApiService';
+import BottomAppBar from "../components/BottomAppBar";
+
 
 const List = () => {
   const { listId } = useParams();
@@ -82,6 +84,18 @@ const List = () => {
           </li>
         ))}
       </ul>
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          width: "100%",
+          background: "#f0f0f0",
+          padding: "10px",
+        }}
+      >
+        <BottomAppBar />
+      </div>
     </div>
   );
 };

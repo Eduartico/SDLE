@@ -10,7 +10,7 @@ const BottomAppBar = () => {
       className="bottom-app-bar"
       style={{ display: "flex", justifyContent: "space-around" }}
     >
-      <Link to="/">
+      <Link to="/home">
         <HomeIcon fontSize="large" />
       </Link>
       <Link to="/recipes">

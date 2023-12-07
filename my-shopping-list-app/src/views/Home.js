@@ -33,7 +33,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div>
+    <div>{/*
       <div
         style={{
           position: "fixed",
@@ -49,7 +49,7 @@ const Home = () => {
             style={{ width: "30px", height: "30px" }}
           />
         </button>
-      </div>
+      </div>*/}
 
       {loading && <p>Loading...</p>}
 
