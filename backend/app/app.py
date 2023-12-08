@@ -136,7 +136,7 @@ def get_current_user():
             abort(404)
         data = {
             'user': {
-                'username': username,
+                'name': username,
                 'id': user_id
             }
         }
