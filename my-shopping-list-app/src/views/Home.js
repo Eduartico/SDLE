@@ -4,6 +4,7 @@ import ApiService from "../services/ApiService";
 import { Button, ListGroup, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import BottomAppBar from "../components/BottomAppBar";
+import "../App.css";
 
 const Home = () => {
   const [user, setUser] = useState(null);
@@ -51,6 +52,15 @@ const Home = () => {
     setNewListName("");
     setNewListUsernames("");
   };
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", paddingTop: "50px" }}>
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ paddingLeft: "5%", paddingRight: "5%", paddingTop: "5%" }}>

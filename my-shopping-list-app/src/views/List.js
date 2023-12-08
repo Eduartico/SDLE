@@ -79,7 +79,12 @@ const List = () => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div style={{ textAlign: "center", paddingTop: "50px" }}>
+        <div className="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
   }
 
   if (error) {
@@ -90,28 +95,17 @@ const List = () => {
     <Container style={{ padding: "20px" }}>
       <h2 className="text-left">{list.name}</h2>
 
+      {/* Done items */}
       <h3 className="text-left">Done</h3>
       <ul>
         {list.items
           .filter((item) => item.boughtQuantity === item.quantity)
           .map((item) => (
             <li key={item.id}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "left",
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "center" }}>
                 <strong>{item.name} - </strong>
-                <div
-                  style={{
-                    cursor: "pointer",
-                    marginLeft: "5px",
-                    marginRight: "5px",
-                  }}
-                >
-                  {" "}
-                  Needed: {item.quantity}{" "}
+                <div style={{ marginLeft: "5px", marginRight: "5px" }}>
+                  Needed: {item.quantity}
                 </div>
                 <Form.Check
                   type="checkbox"
@@ -120,9 +114,10 @@ const List = () => {
                   onChange={() => handleToggleDone(item.id)}
                 />
                 {item.quantity > 1 && (
-                  <div>
+                  <div style={{ marginLeft: "5px" }}>
                     <Button
-                      variant="link"
+                      variant="danger"
+                      size="sm"
                       onClick={() =>
                         handleQuantityChange(
                           item.id,
@@ -132,9 +127,12 @@ const List = () => {
                     >
                       -
                     </Button>
-                    <span>{item.boughtQuantity}</span>
+                    <span style={{ margin: "0 5px" }}>
+                      {item.boughtQuantity}
+                    </span>
                     <Button
-                      variant="link"
+                      variant="danger"
+                      size="sm"
                       onClick={() =>
                         handleQuantityChange(item.id, item.boughtQuantity + 1)
                       }
@@ -147,28 +145,18 @@ const List = () => {
             </li>
           ))}
       </ul>
+
+      {/* Needed items */}
       <h3 className="text-left">Needed</h3>
       <ul>
         {list.items
           .filter((item) => item.boughtQuantity < item.quantity)
           .map((item) => (
             <li key={item.id}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "left",
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "center" }}>
                 <strong>{item.name} - </strong>
-                <div
-                  style={{
-                    cursor: "pointer",
-                    marginLeft: "5px",
-                    marginRight: "5px",
-                  }}
-                >
-                  {" "}
-                  Needed: {item.quantity}{" "}
+                <div style={{ marginLeft: "5px", marginRight: "5px" }}>
+                  Needed: {item.quantity}
                 </div>
                 <Form.Check
                   type="checkbox"
@@ -177,9 +165,10 @@ const List = () => {
                   onChange={() => handleToggleDone(item.id)}
                 />
                 {item.quantity > 1 && (
-                  <div>
+                  <div style={{ marginLeft: "5px" }}>
                     <Button
-                      variant="link"
+                      variant="danger"
+                      size="sm"
                       onClick={() =>
                         handleQuantityChange(
                           item.id,
@@ -189,9 +178,12 @@ const List = () => {
                     >
                       -
                     </Button>
-                    <span>{item.boughtQuantity}</span>
+                    <span style={{ margin: "0 5px" }}>
+                      {item.boughtQuantity}
+                    </span>
                     <Button
-                      variant="link"
+                      variant="danger"
+                      size="sm"
                       onClick={() =>
                         handleQuantityChange(item.id, item.boughtQuantity + 1)
                       }
