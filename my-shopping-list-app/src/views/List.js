@@ -67,18 +67,32 @@ const List = () => {
     }
   };
 
-  const handleAddItem = (e) => {
+  const handleAddItem = async (e) => {
     e.preventDefault();
-    const newItem = {
-      id: Math.random().toString(),
-      name: newItemName,
-      quantity: newItemQuantity,
-      boughtQuantity: 0,
-    };
-    setList((prevList) => ({
-      ...prevList,
-      items: [...prevList.items, newItem],
-    }));
+  
+    try {
+      const newItemResponse = await ApiService.addListItem(
+        list.id,
+        newItemName,
+        newItemQuantity,
+        0  // Assumindo que o boughtQuantity começa como 0
+      );
+  
+      const newItem = {
+        id: newItemResponse.data.item_id,
+        name: newItemName,
+        quantity: newItemQuantity,
+        boughtQuantity: 0,
+      };
+  
+      setList((prevList) => ({
+        ...prevList,
+        items: [...prevList.items, newItem],
+      }));
+    } catch (error) {
+      console.error('Error adding new item:', error);
+    }
+  
     setNewItemName("");
     setNewItemQuantity(1);
     setIsAddItemModalOpen(false);

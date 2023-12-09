@@ -95,6 +95,18 @@ const ApiService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  addListItem: async (listId, name, quantity, boughtQuantity) => {
+    const url = `${BASE_URL}/list/${listId}/addItem`;
+    const data = { name, quantity, boughtQuantity };
+  
+    try {
+      const response = await axios.post(url, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
 

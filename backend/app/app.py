@@ -162,11 +162,12 @@ def add_list():
     db.commit()
     return jsonify({'data': {'list_id': cursor.lastrowid}})
 
-@app.route('/api/addListItem', methods=['POST'])
-def add_list_item():
+@app.route('/api/list/<int:list_id>/addItem', methods=['POST']) # maybe a PUT
+def add_list_item(list_id):
     req_data = request.get_json()
     db = get_db()
-    cursor = db.execute('INSERT INTO ListItem (ListId, Name, Quantity, BoughtQuantity) VALUES (?, ?, ?, ?)', (req_data['listId'], req_data['name'], req_data['quantity'], req_data['boughtQuantity']))
+    cursor = db.execute('INSERT INTO ListItem (ListId, Name, Quantity, BoughtQuantity) VALUES (?, ?, ?, ?)',
+                       (list_id, req_data['name'], req_data['quantity'], req_data['boughtQuantity']))
     db.commit()
     return jsonify({'data': {'item_id': cursor.lastrowid}})
 
@@ -202,7 +203,7 @@ def delete_list():
     db.commit()
     return jsonify({'data': {'list_id': cursor.lastrowid}})
 
-@app.route('/api/list/<int:list_id>/item/<int:item_id>/buy', methods=['PUT']) # updates itens listed as bought or not
+@app.route('/api/list/<int:list_id>/item/<int:item_id>/buy', methods=['PUT']) # updates items listed as bought or not
 def buy_list_item(list_id, item_id):
     req_data = request.get_json()
     bought_quantity = req_data.get('boughtQuantity', 0)
