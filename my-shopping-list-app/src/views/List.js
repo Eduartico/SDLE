@@ -46,20 +46,26 @@ const List = () => {
     });
   };
 
-  const handleToggleDone = (itemId) => {
-    setList((prevList) => {
-      const updatedItems = prevList.items.map((item) => {
-        if (item.id === itemId) {
-          const newBoughtQuantity =
-            item.boughtQuantity === item.quantity ? 0 : item.quantity;
-          return { ...item, boughtQuantity: newBoughtQuantity };
-        }
-        return item;
-      });
+  const handleToggleDone = async (itemId) => {
+    try {
+        const response = await ApiService.buyListItem(listId, itemId, {
+            boughtQuantity: list.items.find(item => item.id === itemId).boughtQuantity === 0 ? list.items.find(item => item.id === itemId).quantity : 0
+        });
 
-      return { ...prevList, items: updatedItems };
-    });
-  };
+        setList((prevList) => {
+            const updatedItems = prevList.items.map((item) => {
+                if (item.id === itemId) {
+                    return { ...item, boughtQuantity: response.data.bought_quantity };
+                }
+                return item;
+            });
+
+            return { ...prevList, items: updatedItems };
+        });
+    } catch (error) {
+        console.error("Error updating item status:", error);
+    }
+};
 
   const handleAddItem = (e) => {
     e.preventDefault();

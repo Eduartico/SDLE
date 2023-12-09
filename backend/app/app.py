@@ -202,6 +202,17 @@ def delete_list():
     db.commit()
     return jsonify({'data': {'list_id': cursor.lastrowid}})
 
+@app.route('/api/list/<int:list_id>/item/<int:item_id>/buy', methods=['PUT'])
+def buy_list_item(list_id, item_id):
+    req_data = request.get_json()
+    bought_quantity = req_data.get('boughtQuantity', 0)
+
+    db = get_db()
+    cursor = db.execute('UPDATE ListItem SET BoughtQuantity = ? WHERE ListId = ? AND ItemId = ?', (bought_quantity, list_id, item_id))
+    db.commit()
+
+    return jsonify({'data': {'item_id': item_id, 'bought_quantity': bought_quantity}})
+
 
 if __name__ == '__main__':
     with app.app_context():
