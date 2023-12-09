@@ -65,7 +65,7 @@ const List = () => {
     } catch (error) {
         console.error("Error updating item status:", error);
     }
-};
+  };
 
   const handleAddItem = (e) => {
     e.preventDefault();

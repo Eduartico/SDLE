@@ -2,17 +2,6 @@ import axios from 'axios';
 
 const BASE_URL = 'http://localhost:5000/api'; // TO DO TROCAR URL 
 const ApiService = {
-
-  buyListItem: async (listId, itemId, data) => {
-    const url = `${BASE_URL}/list/${listId}/item/${itemId}/buy`;
-
-    try {
-      const response = await axios.put(url, data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
   
   authenticateUser: async (username, password) => {
     try {
@@ -85,6 +74,28 @@ const ApiService = {
     return response.data;
   },
 
+  buyListItem: async (listId, itemId, data) => {
+    const url = `${BASE_URL}/list/${listId}/item/${itemId}/buy`;
+
+    try {
+      const response = await axios.put(url, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  addList: async (name, isRecipe, userId) => {
+    const url = `${BASE_URL}/addList`;
+    const data = { name, isRecipe, userId };
+  
+    try {
+      const response = await axios.post(url, data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export default ApiService;

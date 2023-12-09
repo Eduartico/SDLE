@@ -202,7 +202,7 @@ def delete_list():
     db.commit()
     return jsonify({'data': {'list_id': cursor.lastrowid}})
 
-@app.route('/api/list/<int:list_id>/item/<int:item_id>/buy', methods=['PUT'])
+@app.route('/api/list/<int:list_id>/item/<int:item_id>/buy', methods=['PUT']) # updates itens listed as bought or not
 def buy_list_item(list_id, item_id):
     req_data = request.get_json()
     bought_quantity = req_data.get('boughtQuantity', 0)

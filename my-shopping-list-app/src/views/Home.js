@@ -37,17 +37,23 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const handleAddList = (e) => {
+  const handleAddList = async (e) => {
     e.preventDefault();
-
-    const newList = {
-      id: Math.random().toString(),
-      name: newListName,
-      usernames: newListUsernames.split(",").map((username) => username.trim()),
-    };
-
-    setLists((prevLists) => [...prevLists, newList]);
-
+  
+    try {
+      const newListResponse = await ApiService.addList(newListName, false, user.id);
+  
+      const newList = {
+        id: newListResponse.data.list_id,
+        name: newListName,
+        usernames: newListUsernames.split(",").map((username) => username.trim()),
+      };
+  
+      setLists((prevLists) => [...prevLists, newList]);
+    } catch (error) {
+      console.error('Error adding new list:', error);
+    }
+  
     setIsAddListModalOpen(false);
     setNewListName("");
     setNewListUsernames("");
