@@ -14,11 +14,20 @@ const Home = () => {
   const [newListName, setNewListName] = useState("");
   const [newListUsernames, setNewListUsernames] = useState("");
   const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setIsFlipped((prevIsFlipped) => !prevIsFlipped);
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   useEffect(() => {
     const fetchData = async () => {
-      await delay(1000);
+      await delay(500);
       try {
         const userResponse = await ApiService.getCurrentUser();
         setUser(userResponse.data.user);
@@ -37,7 +46,7 @@ const Home = () => {
     };
 
     fetchData();
-  }, []);
+  }, [isFlipped]);
 
   const handleAddList = async (e) => {
     e.preventDefault();
@@ -48,14 +57,14 @@ const Home = () => {
         newListUsernames + "," + user.id
       );
 
-const newList = {
-  id: newListResponse.data.list_id,
-  name: newListName,
-  usersId: newListUsernames
-    .split(",")
-    .map((username) => username.trim())
-    .filter((username) => username !== ',' && !isNaN(username))
-};
+      const newList = {
+        id: newListResponse.data.list_id,
+        name: newListName,
+        usersId: newListUsernames
+          .split(",")
+          .map((username) => username.trim())
+          .filter((username) => username !== "," && !isNaN(username)),
+      };
 
       setLists((prevLists) => [...prevLists, newList]);
     } catch (error) {

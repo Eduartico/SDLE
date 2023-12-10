@@ -12,6 +12,15 @@ const List = () => {
   const [newItemName, setNewItemName] = useState("");
   const [newItemQuantity, setNewItemQuantity] = useState(1);
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setIsFlipped((prevIsFlipped) => !prevIsFlipped);
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const fetchList = async () => {
@@ -27,7 +36,7 @@ const List = () => {
     };
 
     fetchList();
-  }, [listId]);
+  }, [listId, isAddItemModalOpen, isFlipped]);
 
   const handleQuantityChange = async (itemId, newQuantity) => {
     try {
@@ -35,16 +44,19 @@ const List = () => {
       setList((prevList) => {
         const updatedItems = prevList.items.map((item) => {
           if (item.id === itemId) {
-            const boughtQuantity = Math.max(0, Math.min(newQuantity, item.quantity));
-  
+            const boughtQuantity = Math.max(
+              0,
+              Math.min(newQuantity, item.quantity)
+            );
+
             // Chamada à API para atualizar boughtQuantity na base de dados
             ApiService.updateItemBoughtQuantity(listId, itemId, boughtQuantity);
-  
+
             return { ...item, boughtQuantity };
           }
           return item;
         });
-  
+
         return { ...prevList, items: updatedItems };
       });
     } catch (error) {
@@ -55,19 +67,24 @@ const List = () => {
   const handleToggleDone = async (itemId) => {
     try {
       const currentItem = list.items.find((item) => item.id === itemId);
-      const newBoughtQuantity = currentItem.boughtQuantity === 0 ? currentItem.quantity : 0;
-  
+      const newBoughtQuantity =
+        currentItem.boughtQuantity === 0 ? currentItem.quantity : 0;
+
       // Atualiza o estado local
       setList((prevList) => {
         const updatedItems = prevList.items.map((item) =>
-          item.id === itemId ? { ...item, boughtQuantity: newBoughtQuantity } : item
+          item.id === itemId
+            ? { ...item, boughtQuantity: newBoughtQuantity }
+            : item
         );
         return { ...prevList, items: updatedItems };
       });
-  
+
       // Atualiza a base de dados apenas se necessário
       if (currentItem.boughtQuantity !== newBoughtQuantity) {
-        await ApiService.buyListItem(listId, itemId, { boughtQuantity: newBoughtQuantity });
+        await ApiService.buyListItem(listId, itemId, {
+          boughtQuantity: newBoughtQuantity,
+        });
       }
     } catch (error) {
       console.error("Error updating item status:", error);
@@ -76,22 +93,22 @@ const List = () => {
 
   const handleAddItem = async (e) => {
     e.preventDefault();
-  
+
     try {
       const newItemResponse = await ApiService.addListItem(
         list.id,
         newItemName,
         newItemQuantity,
-        0 
+        0
       );
-  
+
       const newItem = {
         id: newItemResponse.data.item_id,
         name: newItemName,
         quantity: newItemQuantity,
         boughtQuantity: 0,
       };
-  
+
       setList((prevList) => ({
         ...prevList,
         items: [...prevList.items, newItem],
@@ -99,7 +116,7 @@ const List = () => {
     } catch (error) {
       console.error("Error adding new item:", error);
     }
-  
+
     setNewItemName("");
     setNewItemQuantity(1);
     setIsAddItemModalOpen(false);
@@ -147,16 +164,28 @@ const List = () => {
                           <Button
                             variant="danger"
                             size="sm"
-                            onClick={() => handleQuantityChange(item.id, item.boughtQuantity - 1)}
+                            onClick={() =>
+                              handleQuantityChange(
+                                item.id,
+                                item.boughtQuantity - 1
+                              )
+                            }
                           >
                             -
                           </Button>
                         )}
-                        <span style={{ margin: "0 5px" }}>{item.boughtQuantity}</span>
+                        <span style={{ margin: "0 5px" }}>
+                          {item.boughtQuantity}
+                        </span>
                         <Button
                           variant="danger"
                           size="sm"
-                          onClick={() => handleQuantityChange(item.id, item.boughtQuantity + 1)}
+                          onClick={() =>
+                            handleQuantityChange(
+                              item.id,
+                              item.boughtQuantity + 1
+                            )
+                          }
                         >
                           +
                         </Button>

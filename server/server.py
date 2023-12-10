@@ -10,8 +10,8 @@ except:
 PORT = 5100  + server_id # Set port here
 server_db = f'server_{server_id}.db'
 
-pub_socket = zmq.Context().socket(zmq.PUB)
-pub_socket.bind("tcp://*:{}".format(PORT + 1))  # Usando uma porta diferente para o PUB
+#pub_socket = zmq.Context().socket(zmq.PUB)
+#pub_socket.bind("tcp://*:{}".format(PORT + 1))  # Usando uma porta diferente para o PUB
 
 def init_db():
     db = get_db()
@@ -40,10 +40,17 @@ def action_add_item(item_id, list_id, item_name, quantity):
     })
     pub_socket.send_string(message)
 
-def action_update_item(list_id, item_name, quantity):
-    print("Updating {} in list {}".format(item_name, list_id))
+def action_update_item(item_id, boughtQuantity):
+    db = get_db()
+    db.execute('UPDATE ListItem SET BoughtQuantity = ? WHERE ItemId = ?', (boughtQuantity, item_id))
+    db.commit()
+    print("Updated item {}".format(item_id))
 
-def action_add_list(list_id):
+def action_add_list(list_id, name, is_recipe, user_id):
+    db = get_db()
+    db.execute('INSERT INTO List (ListId, Name, IsRecipe) VALUES (?,?,?)', (list_id, name, is_recipe))
+    db.execute('INSERT INTO ListUser (ListId, UserId) VALUES (?,?)', (user_id, list_id))
+    db.commit()
     print("Adding list {}".format(list_id))
 
 def action_get_list(list_id):
@@ -88,15 +95,15 @@ while True:
 
     if json_obj['action'] == 'add_item':
         action_add_item(json_obj['item_id'], json_obj['list_id'], json_obj['item_name'], json_obj['quantity'])
-        socket.send_multipart([address, b"", b"OK"]) 
+        socket.send_multipart([address, b"", b"Added item"]) 
         
     elif json_obj['action'] == 'update_item':
-        action_update_item(json_obj['list_id'], json_obj['item_name'], json_obj['quantity'])
+        action_update_item(json_obj['item_id'], json_obj['boughtQuantity'])
         socket.send_multipart([address, b"", b"OK"]) 
         
     elif json_obj['action'] == 'add_list':
-        action_add_list(json_obj['list_id'], json_obj['name'])
-        socket.send_multipart([address, b"", b"OK"]) 
+        action_add_list(json_obj['list_id'], json_obj['list_name'], json_obj['is_recipe'], json_obj['user_id'])
+        socket.send_multipart([address, b"", b"Added list"]) 
         
     elif json_obj['action'] == 'get_list':
         response = action_get_list(json_obj['list_id'])
@@ -106,12 +113,13 @@ while True:
         print("Invalid action")    
         socket.send_multipart([address, b"", b"OK"])   
 
-    try:
-        message = socket.recv_string(zmq.DONTWAIT)
-        print("Received PUB message:", message)
+    #try:
+        #message = socket.recv_string(zmq.DONTWAIT)
+        #print("Received PUB message:", message)
         # Lógica para lidar com mensagens do publish
-    except zmq.Again:
-        pass
+    #except zmq.Again:
+        #pass
 
+        socket.send_multipart([address, b"", b"Invalid action"])   
     
     

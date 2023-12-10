@@ -4,6 +4,8 @@ from flask import session
 from flask_cors import CORS
 from flask_session.__init__ import Session
 from threading import Lock
+import threading
+
 
 import sqlite3
 import os, sys, zmq, json
@@ -36,6 +38,34 @@ def init_db():
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
+
+def update_lists_periodically():
+    while True:
+        try:
+            db = get_db()
+            cursor = db.execute('SELECT ListId FROM List')
+            all_list_ids = [row['ListId'] for row in cursor.fetchall()]
+
+            for list_id in all_list_ids:
+                response = send_request({
+                'list_id': list_id,
+                'action': 'get_list'
+                })
+                json_obj = json.loads(response)
+                data = json_obj.get('data', {})
+                list_data = data.get('list', {})
+
+                db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?',
+                           (list_data.get('name'), list_data.get('isRecipe'), list_id))
+
+                for item_data in list_data.get('items', []):
+                    db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?',
+                               (item_data.get('name'), item_data.get('quantity'), item_data.get('boughtQuantity'), item_data.get('id')))
+
+            db.commit()
+            time.sleep(10)
+        except Exception as e:
+            print(f"Error updating lists: {e}")
 
 # Funtions to communicate with the broker
 def send_request(request):
@@ -191,7 +221,7 @@ def add_list():
             'list_id': list_id,
             'action': 'add_list',
             'list_name': req_data['name'],
-            'isRecipe': req_data['isRecipe'],
+            'is_recipe': req_data['isRecipe'],
             'user_id': user_id,
             'boughtQuantity': 0
         })
@@ -289,11 +319,14 @@ if __name__ == '__main__':
         try:
             g.username
             g.user_id
+            update_thread = threading.Thread(target=update_lists_periodically)
+            update_thread.start()
         except:
             g.username = None
             g.user_id = None
         if not os.path.exists(app.config['DATABASE']):
             init_db()
+
     app.run(debug=True, port=PORT)
 
 
