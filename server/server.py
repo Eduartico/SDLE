@@ -10,6 +10,9 @@ except:
 PORT = 5100  + server_id # Set port here
 server_db = f'server_{server_id}.db'
 
+pub_socket = zmq.Context().socket(zmq.PUB)
+pub_socket.bind("tcp://*:{}".format(PORT + 1))  # Usando uma porta diferente para o PUB
+
 def init_db():
     db = get_db()
     with open('schema.sql', mode='r') as f:
@@ -26,6 +29,16 @@ def action_add_item(item_id, list_id, item_name, quantity):
     db.execute('INSERT INTO ListItem (ItemId, ListId, Name, Quantity, BoughtQuantity) VALUES (?,?,?,?,?)', (item_id, list_id, item_name, quantity, 0))
     db.commit()
     print("Added {} to list {}".format(item_name, list_id))
+
+    # Publicar json
+    message = json.dumps({
+        'action': 'add_item',
+        'item_id': item_id,
+        'list_id': list_id,
+        'item_name': item_name,
+        'quantity': quantity
+    })
+    pub_socket.send_string(message)
 
 def action_update_item(list_id, item_name, quantity):
     print("Updating {} in list {}".format(item_name, list_id))
@@ -92,5 +105,13 @@ while True:
     else:
         print("Invalid action")    
         socket.send_multipart([address, b"", b"OK"])   
+
+    try:
+        message = socket.recv_string(zmq.DONTWAIT)
+        print("Received PUB message:", message)
+        # Lógica para lidar com mensagens do publish
+    except zmq.Again:
+        pass
+
     
     
