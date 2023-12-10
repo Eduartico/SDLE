@@ -12,9 +12,10 @@ socket = zmq.Context().socket(zmq.REQ)
 socket.identity = u"Client-{}".format(client_number).encode("ascii")
 socket.connect("tcp://localhost:5559")
 socket.send_json(json.dumps({
-    'list_id': '123',
-    'action': 'add_item',
-    'item_name': 'Milk',
+    'item_id': '5',
+    'list_id': '1',
+    'action': 'get_list',
+    'item_name': 'dasdasda',
     'quantity': 0
 }))
 
