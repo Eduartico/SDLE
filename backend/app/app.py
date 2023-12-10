@@ -6,10 +6,15 @@ from flask_session.__init__ import Session
 from threading import Lock
 
 import sqlite3
-import os
+import os, sys, zmq, json
+
+try :
+    client_number = int(sys.argv[1])
+except:
+    client_number = 0
 
 app = Flask(__name__)
-PORT = 5000  # Set port here
+PORT = 5000  + client_number # Set port here
 app.config['DATABASE'] = f'database_{PORT}.db'
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
@@ -18,7 +23,6 @@ CORS(app)
 state_lock = Lock()
 username = None
 user_id = None
-
 
 def get_db():
     if 'db' not in g:
@@ -32,6 +36,15 @@ def init_db():
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
+
+# Funtions to communicate with the broker
+def send_request(request):
+    socket = zmq.Context().socket(zmq.REQ)
+    socket.identity = u"Client-{}".format(client_number).encode("ascii")
+    socket.connect("tcp://localhost:5559")
+    socket.send_json(json.dumps(request))
+    reply = socket.recv_json()
+    socket.close()
 
 @app.route('/api/users', methods=['GET'])
 def get_users():
