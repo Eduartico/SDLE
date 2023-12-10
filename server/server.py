@@ -79,9 +79,11 @@ while True:
         
     elif json_obj['action'] == 'update_item':
         action_update_item(json_obj['list_id'], json_obj['item_name'], json_obj['quantity'])
+        socket.send_multipart([address, b"", b"OK"]) 
         
     elif json_obj['action'] == 'add_list':
         action_add_list(json_obj['list_id'], json_obj['name'])
+        socket.send_multipart([address, b"", b"OK"]) 
         
     elif json_obj['action'] == 'get_list':
         response = action_get_list(json_obj['list_id'])

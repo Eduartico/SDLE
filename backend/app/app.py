@@ -168,12 +168,34 @@ def register():
 
 @app.route('/api/addList', methods=['POST'])
 def add_list():
+    print('starting add')
+
     req_data = request.get_json()
+    user_ids = req_data.get('usersId', [])
+    print(user_ids)
+    
     db = get_db()
-    cursor = db.execute('INSERT INTO List (Name, IsRecipe) VALUES (?, ?)', (req_data['name'], req_data['isRecipe']))
-    cursor = db.execute('INSERT INTO ListUser (ListId, UserId) VALUES (?,?)', (cursor.lastrowid, req_data['userId']))
-    db.commit()
-    return jsonify({'data': {'list_id': cursor.lastrowid}})
+    is_recipe_value = 1 if req_data['isRecipe'] else 0
+    cursor = db.execute('INSERT INTO List (Name, IsRecipe) VALUES (?, ?)', (req_data['name'], is_recipe_value))
+
+    list_id = cursor.lastrowid
+
+    for user_id in user_ids:
+        if(user_id == ','):
+            continue
+        print(f'adding {list_id} to {user_id}')
+        db.execute('INSERT INTO ListUser (ListId, UserId) VALUES (?, ?)', (list_id, user_id))
+        db.commit()
+        
+        send_request({
+            'list_id': list_id,
+            'action': 'add_list',
+            'list_name': req_data['name'],
+            'isRecipe': req_data['isRecipe'],
+            'user_id': user_id,
+            'boughtQuantity': 0
+        })
+    return jsonify({'data': {'list_id': list_id}})
 
 @app.route('/api/list/<int:list_id>/addItem', methods=['POST'])
 def add_list_item(list_id):
@@ -182,6 +204,14 @@ def add_list_item(list_id):
     cursor = db.execute('INSERT INTO ListItem (ListId, Name, Quantity, BoughtQuantity) VALUES (?, ?, ?, ?)',
                        (list_id, req_data['name'], req_data['quantity'], req_data['boughtQuantity']))
     db.commit()
+    send_request({
+        'list_id': list_id,
+        'action': 'add_item',
+        'item_id': cursor.lastrowid,
+        'item_name': req_data['name'],
+        'quantity': req_data['quantity'],
+        'boughtQuantity': 0
+    })
     return jsonify({'data': {'item_id': cursor.lastrowid}})
 
 @app.route('/api/updateList', methods=['PUT'])
@@ -198,6 +228,11 @@ def update_list_item():
     db = get_db()
     cursor = db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?', (req_data['name'], req_data['quantity'], req_data['boughtQuantity'], req_data['itemId']))
     db.commit()
+    send_request({
+        'action': 'update_item',
+        'item_id': req_data['itemId'],
+        'boughtQuantity': req_data['boughtQuantity']
+    })
     return jsonify({'data': {'item_id': cursor.lastrowid}})
 
 @app.route('/api/deleteListItem', methods=['DELETE'])
@@ -224,6 +259,13 @@ def buy_list_item(list_id, item_id):
     db = get_db()
     cursor = db.execute('UPDATE ListItem SET BoughtQuantity = ? WHERE ListId = ? AND ItemId = ?', (bought_quantity, list_id, item_id))
     db.commit()
+    
+    send_request({
+        'list_id': list_id,
+        'action': 'update_item',
+        'item_id': item_id,
+        'boughtQuantity': bought_quantity
+    })
 
     return jsonify({'data': {'item_id': item_id, 'bought_quantity': bought_quantity}})
 

@@ -41,21 +41,21 @@ const Home = () => {
 
   const handleAddList = async (e) => {
     e.preventDefault();
-
     try {
       const newListResponse = await ApiService.addList(
         newListName,
         false,
-        user.id
+        newListUsernames + "," + user.id
       );
 
-      const newList = {
-        id: newListResponse.data.list_id,
-        name: newListName,
-        usernames: newListUsernames
-          .split(",")
-          .map((username) => username.trim()),
-      };
+const newList = {
+  id: newListResponse.data.list_id,
+  name: newListName,
+  usersId: newListUsernames
+    .split(",")
+    .map((username) => username.trim())
+    .filter((username) => username !== ',' && !isNaN(username))
+};
 
       setLists((prevLists) => [...prevLists, newList]);
     } catch (error) {

@@ -23,7 +23,7 @@ const ApiService = {
 
   getUserLists: async (userId) => {
     console.log(userId);
-    const response = await axios.get(`${BASE_URL}/user/${userId}/lists`); // TO DO TROCAR ENDPOINT
+    const response = await axios.get(`${BASE_URL}/user/${userId}/lists`); 
     return response.data;
   },
 
@@ -85,9 +85,9 @@ const ApiService = {
     }
   },
 
-  addList: async (name, isRecipe, userId) => {
+  addList: async (name, isRecipe, usersId) => {
     const url = `${BASE_URL}/addList`;
-    const data = { name, isRecipe, userId };
+    const data = { name, isRecipe, usersId };
   
     try {
       const response = await axios.post(url, data);
