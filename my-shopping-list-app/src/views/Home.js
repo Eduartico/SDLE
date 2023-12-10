@@ -46,7 +46,7 @@ const Home = () => {
     };
 
     fetchData();
-  }, [isFlipped]);
+  }, [isFlipped, isAddListModalOpen]);
 
   const handleAddList = async (e) => {
     e.preventDefault();

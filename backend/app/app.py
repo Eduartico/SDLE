@@ -5,10 +5,10 @@ from flask_cors import CORS
 from flask_session.__init__ import Session
 from threading import Lock
 import threading
-
-
 import sqlite3
 import os, sys, zmq, json
+import time
+
 
 try :
     client_number = int(sys.argv[1])
@@ -16,7 +16,7 @@ except:
     client_number = 0
 
 app = Flask(__name__)
-PORT = 5000  + client_number # Set port here
+PORT = 5000  + client_number
 app.config['DATABASE'] = f'database_{PORT}.db'
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
@@ -40,32 +40,38 @@ def init_db():
         db.commit()
 
 def update_lists_periodically():
-    while True:
-        try:
-            db = get_db()
-            cursor = db.execute('SELECT ListId FROM List')
-            all_list_ids = [row['ListId'] for row in cursor.fetchall()]
+    print('update_lists_periodically is running')  # Add this line
+    with app.app_context():
+        while True:
+            try:
+                print('Updated')
+                db = get_db()
+                cursor = db.execute('SELECT ListId FROM List')
+                all_list_ids = [row['ListId'] for row in cursor.fetchall()]
+                print('all_list_ids is ready')
 
-            for list_id in all_list_ids:
-                response = send_request({
-                'list_id': list_id,
-                'action': 'get_list'
-                })
-                json_obj = json.loads(response)
-                data = json_obj.get('data', {})
-                list_data = data.get('list', {})
+                for list_id in all_list_ids:
+                    print('sending request')
+                    response = send_request({
+                    'list_id': list_id,
+                    'action': 'get_list'
+                    })
+                    print('received')
+                    json_obj = json.loads(response)
+                    data = json_obj.get('data', {})
+                    list_data = data.get('list', {})
 
-                db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?',
-                           (list_data.get('name'), list_data.get('isRecipe'), list_id))
+                    db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?',
+                            (list_data.get('name'), list_data.get('isRecipe'), list_id))
 
-                for item_data in list_data.get('items', []):
-                    db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?',
-                               (item_data.get('name'), item_data.get('quantity'), item_data.get('boughtQuantity'), item_data.get('id')))
-
-            db.commit()
-            time.sleep(10)
-        except Exception as e:
-            print(f"Error updating lists: {e}")
+                    for item_data in list_data.get('items', []):
+                        db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?',
+                                (item_data.get('name'), item_data.get('quantity'), item_data.get('boughtQuantity'), item_data.get('id')))
+                print('Finished updating')  # Add this line
+                db.commit()
+                time.sleep(10)
+            except Exception as e:
+                print(f"Error updating lists: {e}")
 
 # Funtions to communicate with the broker
 def send_request(request):
@@ -315,12 +321,13 @@ def get_recipes():
 
 
 if __name__ == '__main__':
+    update_thread = threading.Thread(target=update_lists_periodically, daemon=True)
+    print('Starting update_thread')
+    update_thread.start()
     with app.app_context():
         try:
             g.username
             g.user_id
-            update_thread = threading.Thread(target=update_lists_periodically)
-            update_thread.start()
         except:
             g.username = None
             g.user_id = None
