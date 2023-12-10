@@ -29,42 +29,46 @@ const List = () => {
     fetchList();
   }, [listId]);
 
-  const handleQuantityChange = (itemId, newQuantity) => {
-    setList((prevList) => {
-      const updatedItems = prevList.items.map((item) => {
-        if (item.id === itemId) {
-          const boughtQuantity = Math.max(
-            0,
-            Math.min(newQuantity, item.quantity)
-          );
-          return { ...item, boughtQuantity };
-        }
-        return item;
+  const handleQuantityChange = async (itemId, newQuantity) => {
+    try {
+      // Atualiza localmente o estado da lista
+      setList((prevList) => {
+        const updatedItems = prevList.items.map((item) => {
+          if (item.id === itemId) {
+            const boughtQuantity = Math.max(0, Math.min(newQuantity, item.quantity));
+  
+            // Chamada à API para atualizar boughtQuantity na base de dados
+            ApiService.updateItemBoughtQuantity(listId, itemId, boughtQuantity);
+  
+            return { ...item, boughtQuantity };
+          }
+          return item;
+        });
+  
+        return { ...prevList, items: updatedItems };
       });
-
-      return { ...prevList, items: updatedItems };
-    });
+    } catch (error) {
+      console.error("Error updating item quantity:", error);
+    }
   };
 
   const handleToggleDone = async (itemId) => {
     try {
-      const response = await ApiService.buyListItem(listId, itemId, {
-        boughtQuantity:
-          list.items.find((item) => item.id === itemId).boughtQuantity === 0
-            ? list.items.find((item) => item.id === itemId).quantity
-            : 0,
-      });
-
+      const currentItem = list.items.find((item) => item.id === itemId);
+      const newBoughtQuantity = currentItem.boughtQuantity === 0 ? currentItem.quantity : 0;
+  
+      // Atualiza o estado local
       setList((prevList) => {
-        const updatedItems = prevList.items.map((item) => {
-          if (item.id === itemId) {
-            return { ...item, boughtQuantity: response.data.bought_quantity };
-          }
-          return item;
-        });
-
+        const updatedItems = prevList.items.map((item) =>
+          item.id === itemId ? { ...item, boughtQuantity: newBoughtQuantity } : item
+        );
         return { ...prevList, items: updatedItems };
       });
+  
+      // Atualiza a base de dados apenas se necessário
+      if (currentItem.boughtQuantity !== newBoughtQuantity) {
+        await ApiService.buyListItem(listId, itemId, { boughtQuantity: newBoughtQuantity });
+      }
     } catch (error) {
       console.error("Error updating item status:", error);
     }
@@ -72,22 +76,22 @@ const List = () => {
 
   const handleAddItem = async (e) => {
     e.preventDefault();
-
+  
     try {
       const newItemResponse = await ApiService.addListItem(
         list.id,
         newItemName,
         newItemQuantity,
-        0 // Assumindo que o boughtQuantity começa como 0
+        0 
       );
-
+  
       const newItem = {
         id: newItemResponse.data.item_id,
         name: newItemName,
         quantity: newItemQuantity,
         boughtQuantity: 0,
       };
-
+  
       setList((prevList) => ({
         ...prevList,
         items: [...prevList.items, newItem],
@@ -95,7 +99,7 @@ const List = () => {
     } catch (error) {
       console.error("Error adding new item:", error);
     }
-
+  
     setNewItemName("");
     setNewItemQuantity(1);
     setIsAddItemModalOpen(false);

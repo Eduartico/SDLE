@@ -8,7 +8,7 @@ const ApiService = {
       const response = await axios.post(`${BASE_URL}/auth/login`, { username, password });
       return response.data;
     } catch (error) {
-      throw error; // Allow the component to handle the error
+      throw error; 
     }
   },
 
@@ -17,7 +17,7 @@ const ApiService = {
       const response = await axios.get(`${BASE_URL}/user/current`);
       return response.data;
     } catch (error) {
-      throw error; // Allow the component to handle the error
+      throw error; 
     }
   },
 
@@ -117,6 +117,15 @@ const ApiService = {
       throw error;
     }
   },
+
+  updateItemBoughtQuantity: async (listId, itemId, boughtQuantity) => {
+    try {
+      const response = await axios.put(`${BASE_URL}/list/${listId}/item/${itemId}/buy`, { boughtQuantity });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export default ApiService;
