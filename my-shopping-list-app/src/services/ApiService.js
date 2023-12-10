@@ -107,7 +107,16 @@ const ApiService = {
     } catch (error) {
       throw error;
     }
-  }
+  },
+
+  getRecipes: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/user/recipes`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default ApiService;

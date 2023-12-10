@@ -45,10 +45,11 @@ const Profile = () => {
                   />
                 ) : (
                   <Image
-                    src="https://via.placeholder.com/100" // Placeholder image URL
+                    src="https://cdn-icons-png.flaticon.com/512/8847/8847137.png" // Placeholder image URL
                     alt={user.name}
                     roundedCircle
                     className="mb-3"
+                    style={{ width: "100px", height: "100px" }}
                   />
                 )}
                 <h5>{user.name}</h5>

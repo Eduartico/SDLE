@@ -48,51 +48,54 @@ const List = () => {
 
   const handleToggleDone = async (itemId) => {
     try {
-        const response = await ApiService.buyListItem(listId, itemId, {
-            boughtQuantity: list.items.find(item => item.id === itemId).boughtQuantity === 0 ? list.items.find(item => item.id === itemId).quantity : 0
+      const response = await ApiService.buyListItem(listId, itemId, {
+        boughtQuantity:
+          list.items.find((item) => item.id === itemId).boughtQuantity === 0
+            ? list.items.find((item) => item.id === itemId).quantity
+            : 0,
+      });
+
+      setList((prevList) => {
+        const updatedItems = prevList.items.map((item) => {
+          if (item.id === itemId) {
+            return { ...item, boughtQuantity: response.data.bought_quantity };
+          }
+          return item;
         });
 
-        setList((prevList) => {
-            const updatedItems = prevList.items.map((item) => {
-                if (item.id === itemId) {
-                    return { ...item, boughtQuantity: response.data.bought_quantity };
-                }
-                return item;
-            });
-
-            return { ...prevList, items: updatedItems };
-        });
+        return { ...prevList, items: updatedItems };
+      });
     } catch (error) {
-        console.error("Error updating item status:", error);
+      console.error("Error updating item status:", error);
     }
   };
 
   const handleAddItem = async (e) => {
     e.preventDefault();
-  
+
     try {
       const newItemResponse = await ApiService.addListItem(
         list.id,
         newItemName,
         newItemQuantity,
-        0  // Assumindo que o boughtQuantity começa como 0
+        0 // Assumindo que o boughtQuantity começa como 0
       );
-  
+
       const newItem = {
         id: newItemResponse.data.item_id,
         name: newItemName,
         quantity: newItemQuantity,
         boughtQuantity: 0,
       };
-  
+
       setList((prevList) => ({
         ...prevList,
         items: [...prevList.items, newItem],
       }));
     } catch (error) {
-      console.error('Error adding new item:', error);
+      console.error("Error adding new item:", error);
     }
-  
+
     setNewItemName("");
     setNewItemQuantity(1);
     setIsAddItemModalOpen(false);

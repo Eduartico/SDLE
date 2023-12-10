@@ -6,6 +6,7 @@ import Home from "./views/Home";
 import List from "./views/List";
 import Profile from "./views/Profile";
 import Recipes from "./views/Recipes";
+import Recipe from "./views/Recipe";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/list/:listId" element={<List />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/recipes" element={<Recipes />} />
+          <Route path="/recipe/:recipeId" element={<Recipe />} />
         </Routes>
       </AuthProvider>
     </Router>

@@ -15,8 +15,10 @@ const Home = () => {
   const [newListUsernames, setNewListUsernames] = useState("");
   const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
 
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   useEffect(() => {
     const fetchData = async () => {
+      await delay(1000);
       try {
         const userResponse = await ApiService.getCurrentUser();
         setUser(userResponse.data.user);
@@ -39,21 +41,27 @@ const Home = () => {
 
   const handleAddList = async (e) => {
     e.preventDefault();
-  
+
     try {
-      const newListResponse = await ApiService.addList(newListName, false, user.id);
-  
+      const newListResponse = await ApiService.addList(
+        newListName,
+        false,
+        user.id
+      );
+
       const newList = {
         id: newListResponse.data.list_id,
         name: newListName,
-        usernames: newListUsernames.split(",").map((username) => username.trim()),
+        usernames: newListUsernames
+          .split(",")
+          .map((username) => username.trim()),
       };
-  
+
       setLists((prevLists) => [...prevLists, newList]);
     } catch (error) {
-      console.error('Error adding new list:', error);
+      console.error("Error adding new list:", error);
     }
-  
+
     setIsAddListModalOpen(false);
     setNewListName("");
     setNewListUsernames("");

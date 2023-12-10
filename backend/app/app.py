@@ -214,6 +214,20 @@ def buy_list_item(list_id, item_id):
 
     return jsonify({'data': {'item_id': item_id, 'bought_quantity': bought_quantity}})
 
+@app.route('/api/user/recipes', methods=['GET'])
+def get_recipes():
+    db = get_db()
+    cursor = db.execute('SELECT * FROM List WHERE IsRecipe = 1 OR IsRecipe = true')
+    data = cursor.fetchall()
+    data = {
+        'lists': [{
+            'id': d['ListId'],
+            'name': d['Name'],
+            'isRecipe': d['IsRecipe']
+        } for d in data]
+    }
+    return jsonify({'data': data})
+
 
 if __name__ == '__main__':
     with app.app_context():
