@@ -162,7 +162,7 @@ def add_list():
     db.commit()
     return jsonify({'data': {'list_id': cursor.lastrowid}})
 
-@app.route('/api/list/<int:list_id>/addItem', methods=['POST']) # maybe a PUT
+@app.route('/api/list/<int:list_id>/addItem', methods=['POST'])
 def add_list_item(list_id):
     req_data = request.get_json()
     db = get_db()
