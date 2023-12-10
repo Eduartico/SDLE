@@ -7,9 +7,9 @@ def main():
     # Prepare context and sockets
     context = zmq.Context.instance()
     frontend = context.socket(zmq.ROUTER)
-    frontend.bind("ipc://frontend.ipc")
+    frontend.bind("tcp://*:5559")
     backend = context.socket(zmq.ROUTER)
-    backend.bind("ipc://backend.ipc")
+    backend.bind("tcp://*:5560")
 
     backend_ready = False
     workers = []
@@ -37,6 +37,8 @@ def main():
         if frontend in sockets:
             # Get next client request, route to last-used worker
             client, empty, request = frontend.recv_multipart()
+            print("client: ", client)
+            print("request: ", request)
             worker = workers.pop(0)
             backend.send_multipart([worker, b"", client, b"", request])
             if not workers:
