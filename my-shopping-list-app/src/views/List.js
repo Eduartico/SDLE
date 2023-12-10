@@ -117,12 +117,11 @@ const List = () => {
   return (
     <Container style={{ padding: "20px" }}>
       <h2 className="text-left">{list.name}</h2>
-
-      {/* Done items */}
-      <h3 className="text-left">Done</h3>
+      {/* Needed items */}
+      <h3 className="text-left">Needed</h3>
       <ul>
         {list.items
-          .filter((item) => item.boughtQuantity === item.quantity)
+          .filter((item) => item.boughtQuantity < item.quantity)
           .map((item) => (
             <li key={item.id}>
               <div style={{ display: "flex", alignItems: "center" }}>
@@ -169,11 +168,11 @@ const List = () => {
           ))}
       </ul>
 
-      {/* Needed items */}
-      <h3 className="text-left">Needed</h3>
+      {/* Done items */}
+      <h3 className="text-left">Done</h3>
       <ul>
         {list.items
-          .filter((item) => item.boughtQuantity < item.quantity)
+          .filter((item) => item.boughtQuantity === item.quantity)
           .map((item) => (
             <li key={item.id}>
               <div style={{ display: "flex", alignItems: "center" }}>
