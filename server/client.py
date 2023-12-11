@@ -14,11 +14,14 @@ socket.connect("tcp://localhost:5559")
 socket.send_json(json.dumps({
     'item_id': '5',
     'list_id': '1',
-    'action': 'get_list',
+    'action': 'get_lists',
+    'user_id': '1',
     'item_name': 'dasdasda',
     'quantity': 0
 }))
 
 print("Done")
 reply = socket.recv()
+json_reply = json.loads(reply)
+print(json_reply)
 print("{}: {}".format(socket.identity.decode("ascii"), reply))

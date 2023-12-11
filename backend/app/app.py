@@ -61,17 +61,18 @@ def update_lists_periodically():
                     data = json_obj.get('data', {})
                     list_data = data.get('list', {})
 
-                    db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?',
-                            (list_data.get('name'), list_data.get('isRecipe'), list_id))
+                    # db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?',
+                    #         (list_data.get('name'), list_data.get('isRecipe'), list_id))
 
                     for item_data in list_data.get('items', []):
                         db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?',
                                 (item_data.get('name'), item_data.get('quantity'), item_data.get('boughtQuantity'), item_data.get('id')))
-                print('Finished updating')  # Add this line
-                db.commit()
-                time.sleep(10)
+                        print('Finished updating')  # Add this line
+                        db.commit()
+                
             except Exception as e:
                 print(f"Error updating lists: {e}")
+            time.sleep(10)
 
 # Funtions to communicate with the broker
 def send_request(request):
@@ -79,8 +80,11 @@ def send_request(request):
     socket.identity = u"Client-{}".format(client_number).encode("ascii")
     socket.connect("tcp://localhost:5559")
     socket.send_json(json.dumps(request))
-    reply = socket.recv_json()
+    reply = socket.recv()
     socket.close()
+    response = reply.decode('ascii')
+    print(f"Received reply: {response}")
+    return response
 
 @app.route('/api/users', methods=['GET'])
 def get_users():
