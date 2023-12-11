@@ -107,18 +107,12 @@ def action_get_list(list_id):
         return json.dumps({"data": None})
     return json.dumps({"data": data})
 
-def action_get_lists(user_id):
+def action_get_lists():
     try:
         db = get_db()
-        cursor = db.execute('''
-                            SELECT * FROM List WHERE ListId IN (
-                                SELECT ListId FROM ListUser WHERE UserId = ?
-                            )''', (user_id,))
-    except:
-        print("Error getting lists")
-        return json.dumps({"data": None})
-    try:
+        cursor = db.execute('SELECT * FROM List')
         lists = cursor.fetchall()
+        
         data = {}
         for l in lists:
             cursor = db.execute('SELECT * FROM ListItem WHERE ListId = ?', (l['ListId'],))
@@ -127,17 +121,18 @@ def action_get_lists(user_id):
                 'id': l['ListId'],
                 'name': l['Name'],
                 'isRecipe': l['IsRecipe'],
-                'items' : [{
+                'items': [{
                     'id': d['ItemId'],
                     'name': d['Name'],
                     'quantity': d['Quantity'],
                     'boughtQuantity': d['BoughtQuantity']
-                    } for d in items]
+                } for d in items]
             }
-    except:
-        print("Error getting lists")
+        
+        return json.dumps({"data": data})
+    except Exception as e:
+        print(f"Error getting lists: {e}")
         return json.dumps({"data": None})
-    return json.dumps({"data": data})
 
 if not os.path.exists(server_db):
     init_db()

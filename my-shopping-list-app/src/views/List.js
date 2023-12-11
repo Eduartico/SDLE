@@ -163,7 +163,7 @@ const List = () => {
                         {item.boughtQuantity > 0 && (
                           <Button
                             variant="danger"
-                            size="sm"
+                            size="xs"
                             onClick={() =>
                               handleQuantityChange(
                                 item.id,
@@ -179,7 +179,7 @@ const List = () => {
                         </span>
                         <Button
                           variant="danger"
-                          size="sm"
+                          size="xs"
                           onClick={() =>
                             handleQuantityChange(
                               item.id,
@@ -220,7 +220,7 @@ const List = () => {
                   <div style={{ marginLeft: "5px" }}>
                     <Button
                       variant="danger"
-                      size="sm"
+                      size="xs"
                       onClick={() =>
                         handleQuantityChange(
                           item.id,
@@ -235,7 +235,7 @@ const List = () => {
                     </span>
                     <Button
                       variant="danger"
-                      size="sm"
+                      size="xs"
                       onClick={() =>
                         handleQuantityChange(item.id, item.boughtQuantity + 1)
                       }

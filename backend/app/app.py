@@ -40,40 +40,48 @@ def init_db():
         db.commit()
 
 def update_lists_periodically():
-    print('update_lists_periodically is running')  # Add this line
+    print('update_lists_periodically is running')
     with app.app_context():
         while True:
             try:
                 print('Updated')
                 online_status = get_user_online_status()
-                # Use online_status as needed in the update logic
                 print(f"User is {'online' if online_status else 'offline'}")
 
                 db = get_db()
                 cursor = db.execute('SELECT ListId FROM List')
                 all_list_ids = [row['ListId'] for row in cursor.fetchall()]
-                print('all_list_ids is ready')
+                
+                cursor = db.execute('SELECT ItemId FROM ListItem')
+                all_items_ids = [row['ListId'] for row in cursor.fetchall()]
+
+                response = send_request({'action': 'get_lists'})
+
+                json_obj = json.loads(response)
+                data = json_obj.get('data', {})
+                all_received_lists = data.get('list', {})
 
                 for list_id in all_list_ids:
-                    print('sending request')
-                    response = send_request({
-                    'list_id': list_id,
-                    'action': 'get_list'
-                    })
-                    print('received')
-                    json_obj = json.loads(response)
-                    data = json_obj.get('data', {})
-                    list_data = data.get('list', {})
+                    if list_id in all_received_lists:
+                        list_data = all_received_lists[list_id]
 
-                    # db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?',
-                    #         (list_data.get('name'), list_data.get('isRecipe'), list_id))
+                        db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?',
+                                   (list_data.get('name'), list_data.get('isRecipe'), list_id))
+                    else:
+                        db.execute('INSERT INTO List (ListId, Name, IsRecipe) VALUES (?, ?, ?)',
+                                   (list_id, "Default Name", 0))
 
                     for item_data in list_data.get('items', []):
-                        db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?',
-                                (item_data.get('name'), item_data.get('quantity'), item_data.get('boughtQuantity'), item_data.get('id')))
-                        print('Finished updating')  # Add this line
+                        if item_data['id'] in all_items_ids:
+                            db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?',
+                                       (item_data.get('name'), item_data.get('quantity'), item_data.get('boughtQuantity'), item_data['id']))
+                        else:
+                            db.execute('INSERT INTO ListItem (ListId, Name, Quantity, BoughtQuantity) VALUES (?, ?, ?, ?)',
+                                       (list_id, item_data.get('name'), item_data.get('quantity'), item_data.get('boughtQuantity')))
+                        
+                        print('Finished updating')
                         db.commit()
-                
+
             except Exception as e:
                 print(f"Error updating lists: {e}")
             time.sleep(10)
