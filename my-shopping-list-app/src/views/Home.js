@@ -76,6 +76,23 @@ const Home = () => {
     setNewListUsernames("");
   };
 
+  const handleToggleOnlineStatus = async () => {
+    if (!user || !user.id) {
+      console.error('User ID is null or invalid.');
+      return;
+    }
+
+    try {
+      const updatedStatus = !user.online; // Toggle the online status
+      await ApiService.setOnlineStatus(updatedStatus);
+
+      // Atualize o estado local do usuário
+      setUser((prevUser) => ({ ...prevUser, online: updatedStatus }));
+    } catch (error) {
+      console.error('Error updating online status:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ textAlign: "center", paddingTop: "50px" }}>
@@ -114,6 +131,15 @@ const Home = () => {
         onClick={() => setIsAddListModalOpen(true)}
       >
         +
+      </Button>
+
+      <Button
+        variant="outline-danger"
+        className="position-fixed top-5 end-5 z-index-1"
+        style={{ top: "2%", left: "85%" }}
+        onClick={handleToggleOnlineStatus}
+      >
+        {user.online ? "Go Offline" : "Go Online"}
       </Button>
 
       <Modal

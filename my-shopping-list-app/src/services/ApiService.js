@@ -125,6 +125,15 @@ const ApiService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  setOnlineStatus: async (online) => {
+    try {
+      const response = await axios.put(`${BASE_URL}/user/online`, { online });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
 

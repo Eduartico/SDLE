@@ -42,6 +42,10 @@ def init_db():
 def update_lists_periodically():
     while True:
         try:
+            online_status = get_user_online_status()
+            # Use online_status as needed in the update logic
+            print(f"User is {'online' if online_status else 'offline'}")
+
             db = get_db()
             cursor = db.execute('SELECT ListId FROM List')
             all_list_ids = [row['ListId'] for row in cursor.fetchall()]
@@ -180,7 +184,8 @@ def get_current_user():
         data = {
             'user': {
                 'name': username,
-                'id': user_id
+                'id': user_id,
+                'online': get_user_online_status()
             }
         }
         response = jsonify({'data': data})
@@ -312,6 +317,35 @@ def get_recipes():
         } for d in data]
     }
     return jsonify({'data': data})
+
+# User online/offline logic
+
+user_state_lock = Lock()
+user_online = False
+
+def set_user_online_status(online):
+    with user_state_lock:
+        global user_online
+        user_online = online
+
+def get_user_online_status():
+    with user_state_lock:
+        return user_online
+
+@app.route('/api/user/online', methods=['PUT'])
+def set_user_online():
+    req_data = request.get_json()
+    online = req_data.get('online', False)
+    
+    set_user_online_status(online)
+    
+    return jsonify({'data': {'online': online}})
+
+@app.route('/api/user/online', methods=['GET'])
+def get_user_online():
+    online = get_user_online_status()
+    return jsonify({'data': {'online': online}})
+
 
 
 if __name__ == '__main__':

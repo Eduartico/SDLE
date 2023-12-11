@@ -1,6 +1,8 @@
 from __future__ import print_function
 import multiprocessing
 import os, sys, zmq, json, sqlite3
+from queue import Queue
+from threading import Thread
 
 try :
     server_id = int(sys.argv[1])
@@ -13,6 +15,8 @@ server_db = f'server_{server_id}.db'
 #pub_socket = zmq.Context().socket(zmq.PUB)
 #pub_socket.bind("tcp://*:{}".format(PORT + 1))  # Usando uma porta diferente para o PUB
 
+request_queue = Queue() # Create a queue to store pending client requests
+
 def init_db():
     db = get_db()
     with open('schema.sql', mode='r') as f:
@@ -24,6 +28,27 @@ def get_db():
     db.row_factory = sqlite3.Row
     return db
 
+def process_pending_requests():
+    """Thread function to process pending requests."""
+    while True:
+        request = request_queue.get()
+        if request:
+            process_request(request)
+
+def process_request(request):
+    """Process a single request."""
+    address, empty, json_str = request
+    json_obj = json.loads(json_str)
+
+    if json_obj['action'] == 'add_item':
+        action_add_item(json_obj['item_id'], json_obj['list_id'], json_obj['item_name'], json_obj['quantity'])
+        pub_socket.send_string(json_str)  # Publish the request
+        socket.send_multipart([address, b"", b"OK"])
+
+# Start the thread to process pending requests
+processing_thread = Thread(target=process_pending_requests)
+processing_thread.start()
+
 def action_add_item(item_id, list_id, item_name, quantity):
     db = get_db()
     db.execute('INSERT INTO ListItem (ItemId, ListId, Name, Quantity, BoughtQuantity) VALUES (?,?,?,?,?)', (item_id, list_id, item_name, quantity, 0))
@@ -31,14 +56,14 @@ def action_add_item(item_id, list_id, item_name, quantity):
     print("Added {} to list {}".format(item_name, list_id))
 
     # Publicar json
-    message = json.dumps({
-        'action': 'add_item',
-        'item_id': item_id,
-        'list_id': list_id,
-        'item_name': item_name,
-        'quantity': quantity
-    })
-    pub_socket.send_string(message)
+    #message = json.dumps({
+       # 'action': 'add_item',
+       # 'item_id': item_id,
+       # 'list_id': list_id,
+        #'item_name': item_name,
+       # 'quantity': quantity
+    #})
+    #pub_socket.send_string(message)
 
 def action_update_item(item_id, boughtQuantity):
     db = get_db()
@@ -113,12 +138,15 @@ while True:
         print("Invalid action")    
         socket.send_multipart([address, b"", b"OK"])   
 
-    #try:
-        #message = socket.recv_string(zmq.DONTWAIT)
+    try:
+        #message = socket.recv_string(zmq.DONTWAIT) # Lógica para lidar com mensagens do publish
         #print("Received PUB message:", message)
-        # Lógica para lidar com mensagens do publish
-    #except zmq.Again:
-        #pass
+
+        # queue request logic
+        address, empty, request = socket.recv_multipart(zmq.DONTWAIT)
+        request_queue.put((address, empty, request))
+    except zmq.Again:
+        pass
 
         socket.send_multipart([address, b"", b"Invalid action"])   
     
