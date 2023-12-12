@@ -12,8 +12,8 @@ except:
 PORT = 5100  + server_id # Set port here
 server_db = f'server_{server_id}.db'
 
-#pub_socket = zmq.Context().socket(zmq.PUB)
-#pub_socket.bind("tcp://*:{}".format(PORT + 1))  # Usando uma porta diferente para o PUB
+pub_socket = zmq.Context().socket(zmq.PUB)
+pub_socket.bind("tcp://*:{}".format(PORT + 1))  # Usando uma porta diferente para o PUB
 
 request_queue = Queue() # Create a queue to store pending client requests
 

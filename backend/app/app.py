@@ -69,7 +69,7 @@ def update_lists_periodically():
                                    (list_data.get('name'), list_data.get('isRecipe'), list_id))
                     else:
                         db.execute('INSERT INTO List (ListId, Name, IsRecipe) VALUES (?, ?, ?)',
-                                   (list_id, "Default Name", 0))
+                                   (list_id, list_data.get('name'), 0))
 
                     for item_data in list_data.get('items', []):
                         if item_data['id'] in all_items_ids:

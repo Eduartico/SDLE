@@ -83,10 +83,9 @@ const Home = () => {
     }
 
     try {
-      const updatedStatus = !user.online; // Toggle the online status
+      const updatedStatus = !user.online; 
       await ApiService.setOnlineStatus(updatedStatus);
 
-      // Atualize o estado local do usuário
       setUser((prevUser) => ({ ...prevUser, online: updatedStatus }));
     } catch (error) {
       console.error('Error updating online status:', error);
@@ -136,7 +135,7 @@ const Home = () => {
       <Button
         variant="outline-danger"
         className="position-fixed top-5 end-5 z-index-1"
-        style={{ top: "2%", left: "85%" }}
+        style={{ bottom: "11%", right: "72%" }}
         onClick={handleToggleOnlineStatus}
       >
         {user.online ? "Go Offline" : "Go Online"}
