@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from hashing_ring import HashingRing
 import requests
+from urllib.parse import urljoin
 
 ring = HashingRing()
 
@@ -28,10 +29,17 @@ def create_list():
     list_id = data['list_id']
     server = ring.get_node(list_id)
     print(f"redirect to server: {server}")
-    response = requests.post(f"http://localhost:{server}/create_list", json=data)
-    print(response)
-    return 200
 
+    url = urljoin(f"http://localhost:{server}/", "create_list")
+
+    try:
+        response = requests.post(url, json=data)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
+        print(response.json())  # Assuming the response contains JSON data
+        return jsonify({"status": "OK"})
+    except requests.RequestException as e:
+        print(f"Error making request: {e}")
+        return jsonify({"status": "Error", "message": str(e)}), 500  # Return an HTTP 500 Internal Server Error
 
 @app.route('/update_list', methods=['POST'])
 def update_list():
@@ -39,29 +47,48 @@ def update_list():
     list_id = data['list_id']
     server = ring.get_node(list_id)
     print(f"with list id {list_id} redirect to server: {server} ")
-    response = requests.post(f"http://localhost:{server}/update_list", json=data)
-    print(response)
-    return 200
+
+    url = urljoin(f"http://localhost:{server}/", "update_list")
+
+    try:
+        response = requests.post(url, json=data)
+        response.raise_for_status()
+        print(response.json())
+        return jsonify({"status": "OK"})
+    except requests.RequestException as e:
+        print(f"Error making request: {e}")
+        return jsonify({"status": "Error", "message": str(e)}), 500
 
 @app.route('/get_list/<int:list_id>', methods=['GET'])
 def get_list(list_id):
     server = ring.get_node(list_id)
     print(f"redirect to server: {server}")
-    response = requests.get(f"http://localhost:{server}/get_list/{list_id}")
-    print(response)
-    return 200
+
+    url = urljoin(f"http://localhost:{server}/", f"get_list/{list_id}")
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        print(response.json())
+        return jsonify({"status": "OK"})
+    except requests.RequestException as e:
+        print(f"Error making request: {e}")
+        return jsonify({"status": "Error", "message": str(e)}), 500
 
 @app.route('/get_lists', methods=['GET'])
 def get_lists():
     server = ring.get_node("random")
-    response = requests.get(f"http://localhost:{server}/get_lists")
-    print(response)
-    return 200
+
+    url = urljoin(f"http://localhost:{server}/", "get_lists")
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        print(response.json())
+        return jsonify({"status": "OK"})
+    except requests.RequestException as e:
+        print(f"Error making request: {e}")
+        return jsonify({"status": "Error", "message": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=4000, threaded=True)
-
-
-
-
-    
