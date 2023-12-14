@@ -8,12 +8,14 @@ import threading
 import sqlite3
 import os, sys, zmq, json
 import time
-
+import requests
 
 try :
     client_number = int(sys.argv[1])
 except:
     client_number = 0
+
+PROXY = 'http://localhost:4000'
 
 app = Flask(__name__)
 PORT = 5000  + client_number
@@ -55,7 +57,7 @@ def update_lists_periodically():
                 cursor = db.execute('SELECT ItemId FROM ListItem')
                 all_items_ids = [row['ListId'] for row in cursor.fetchall()]
 
-                response = send_request({'action': 'get_lists'})
+                response = requests.get(PROXY + "/get_lists")
 
                 json_obj = json.loads(response)
                 data = json_obj.get('data', {})
@@ -85,18 +87,6 @@ def update_lists_periodically():
             except Exception as e:
                 print(f"Error updating lists: {e}")
             time.sleep(10)
-
-# Funtions to communicate with the broker
-def send_request(request):
-    socket = zmq.Context().socket(zmq.REQ)
-    socket.identity = u"Client-{}".format(client_number).encode("ascii")
-    socket.connect("tcp://localhost:5559")
-    socket.send_json(json.dumps(request))
-    reply = socket.recv()
-    socket.close()
-    response = reply.decode('ascii')
-    print(f"Received reply: {response}")
-    return response
 
 @app.route('/api/users', methods=['GET'])
 def get_users():
@@ -239,15 +229,14 @@ def add_list():
         print(f'adding {list_id} to {user_id}')
         db.execute('INSERT INTO ListUser (ListId, UserId) VALUES (?, ?)', (list_id, user_id))
         db.commit()
-        
-        send_request({
+        response = requests.post(PROXY + "/add_list", json={
             'list_id': list_id,
-            'action': 'add_list',
-            'list_name': req_data['name'],
+            'name': req_data['name'],
             'is_recipe': req_data['isRecipe'],
             'user_id': user_id,
-            'boughtQuantity': 0
+            'items': req_data['items']
         })
+        print(response)
     return jsonify({'data': {'list_id': list_id}})
 
 @app.route('/api/list/<int:list_id>/addItem', methods=['POST'])
@@ -257,14 +246,8 @@ def add_list_item(list_id):
     cursor = db.execute('INSERT INTO ListItem (ListId, Name, Quantity, BoughtQuantity) VALUES (?, ?, ?, ?)',
                        (list_id, req_data['name'], req_data['quantity'], req_data['boughtQuantity']))
     db.commit()
-    send_request({
-        'list_id': list_id,
-        'action': 'add_item',
-        'item_id': cursor.lastrowid,
-        'item_name': req_data['name'],
-        'quantity': req_data['quantity'],
-        'boughtQuantity': 0
-    })
+
+    update_list_to_proxy(list_id)
     return jsonify({'data': {'item_id': cursor.lastrowid}})
 
 @app.route('/api/updateList', methods=['PUT'])
@@ -273,6 +256,7 @@ def update_list():
     db = get_db()
     cursor = db.execute('UPDATE List SET Name = ?, IsRecipe = ? WHERE ListId = ?', (req_data['name'], req_data['isRecipe'], req_data['listId']))
     db.commit()
+    update_list_to_proxy(req_data['listId'])
     return jsonify({'data': {'list_id': cursor.lastrowid}})
 
 @app.route('/api/updateListItem', methods=['PUT'])
@@ -281,11 +265,7 @@ def update_list_item():
     db = get_db()
     cursor = db.execute('UPDATE ListItem SET Name = ?, Quantity = ?, BoughtQuantity = ? WHERE ItemId = ?', (req_data['name'], req_data['quantity'], req_data['boughtQuantity'], req_data['itemId']))
     db.commit()
-    send_request({
-        'action': 'update_item',
-        'item_id': req_data['itemId'],
-        'boughtQuantity': req_data['boughtQuantity']
-    })
+    update_list_to_proxy(req_data['listId'])
     return jsonify({'data': {'item_id': cursor.lastrowid}})
 
 @app.route('/api/deleteListItem', methods=['DELETE'])
@@ -294,6 +274,10 @@ def delete_list_item():
     db = get_db()
     cursor = db.execute('DELETE FROM ListItem WHERE ItemId = ?', (req_data['itemId'],))
     db.commit()
+    cursor = db.execute('SELECT ListId FROM ListItem WHERE ItemId = ?', (req_data['itemId'],))
+    db.commit()
+    list_id = cursor.fetchone()['ListId']
+    update_list_to_proxy(list_id)
     return jsonify({'data': {'item_id': cursor.lastrowid}})
 
 @app.route('/api/deleteList', methods=['DELETE'])
@@ -302,6 +286,7 @@ def delete_list():
     db = get_db()
     cursor = db.execute('DELETE FROM List WHERE ListId = ?', (req_data['listId'],))
     db.commit()
+    update_list_to_proxy(req_data['listId'])
     return jsonify({'data': {'list_id': cursor.lastrowid}})
 
 @app.route('/api/list/<int:list_id>/item/<int:item_id>/buy', methods=['PUT']) # updates items listed as bought or not
@@ -313,12 +298,7 @@ def buy_list_item(list_id, item_id):
     cursor = db.execute('UPDATE ListItem SET BoughtQuantity = ? WHERE ListId = ? AND ItemId = ?', (bought_quantity, list_id, item_id))
     db.commit()
     
-    send_request({
-        'list_id': list_id,
-        'action': 'update_item',
-        'item_id': item_id,
-        'boughtQuantity': bought_quantity
-    })
+    update_list_to_proxy(list_id)
 
     return jsonify({'data': {'item_id': item_id, 'bought_quantity': bought_quantity}})
 
@@ -364,7 +344,27 @@ def get_user_online():
     online = get_user_online_status()
     return jsonify({'data': {'online': online}})
 
-
+def update_list_to_proxy(list_id):
+    db = get_db()
+    cursor = db.execute('SELECT * FROM List WHERE ListId = ?', (list_id,))
+    data = cursor.fetchone()
+    if (data is None): abort(404)
+    cursor = db.execute('SELECT * FROM ListItem WHERE ListId = ?', (list_id,))
+    items = cursor.fetchall()
+    data = {
+        'list_id': data['ListId'],
+        'name': data['Name'],
+        'isRecipe': data['IsRecipe'],
+        'items' : [{
+            'id': d['ItemId'],
+            'name': d['Name'],
+            'quantity': d['Quantity'],
+            'boughtQuantity': d['BoughtQuantity']
+            } for d in items]
+    }
+    response = requests.post(PROXY + "/update_list", json=data)
+    print(response)
+    return 200
 
 if __name__ == '__main__':
     update_thread = threading.Thread(target=update_lists_periodically, daemon=True)

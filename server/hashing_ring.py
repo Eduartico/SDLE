@@ -10,7 +10,7 @@ class HashingRing:
             self.add_node(node)
 
     def add_node(self, node):
-        key = self.gen_key(node)
+        key = self.gen_key(str(node))
         self.ring[key] = node
         self.sorted_keys.append(key)
         self.sorted_keys.sort()
@@ -24,7 +24,7 @@ class HashingRing:
         if not self.ring:
             return None
 
-        key = self.gen_key(string_key)
+        key = self.gen_key(str(string_key))
         nodes = self.sorted_keys
         for i, node_key in enumerate(nodes):
             if key <= node_key:

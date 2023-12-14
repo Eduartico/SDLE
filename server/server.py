@@ -1,31 +1,35 @@
-from __future__ import print_function
-import multiprocessing
-import os, sys, zmq, json, sqlite3
-from queue import Queue
-from threading import Thread
+import os, sys, json, sqlite3
+import requests
+from flask import Flask, request, jsonify, g, Response
 
 try :
     server_id = int(sys.argv[1])
 except:
     server_id = 0
 
+app = Flask(__name__)
 PORT = 5100  + server_id # Set port here
+app.config['DATABASE'] = f'server_{PORT}.db'
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+
 server_db = f'server_{server_id}.db'
 
 def init_db():
-    db = get_db()
-    with open('schema.sql', mode='r') as f:
-        db.cursor().executescript(f.read())
-    db.commit()
+    with app.app_context():
+        db = get_db()
+        with app.open_resource('schema.sql', mode='r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
 
 def get_db():
-    db = sqlite3.connect(server_db)
-    db.row_factory = sqlite3.Row
-    return db
+    if 'db' not in g:
+        g.db = sqlite3.connect(app.config['DATABASE'])
+        g.db.row_factory = sqlite3.Row
+    return g.db
 
-def action_add_item(item_id, list_id, item_name, quantity):
+def action_add_item(item_id, list_id, item_name, quantity, boughtQuantity=0):
     db = get_db()
-    db.execute('INSERT INTO ListItem (ItemId, ListId, Name, Quantity, BoughtQuantity) VALUES (?,?,?,?,?)', (item_id, list_id, item_name, quantity, 0))
+    db.execute('INSERT INTO ListItem (ItemId, ListId, Name, Quantity, BoughtQuantity) VALUES (?,?,?,?,?)', (item_id, list_id, item_name, quantity, boughtQuantity))
     db.commit()
     print("Added {} to list {}".format(item_name, list_id))
 
@@ -98,49 +102,60 @@ def action_get_lists():
         print(f"Error getting lists: {e}")
         return json.dumps({"data": None})
 
-if not os.path.exists(server_db):
-    init_db()
+
+@app.route('/add_list', methods=['POST'])
+def add_list():
+    data = request.get_json()
+    list_id = data['list_id']
+    name = data['name']
+    is_recipe = data['is_recipe']
+    user_id = data['user_id']
+    items = data['items']
+
+    # TODO add also to CRDT implementation
+
+    action_add_list(list_id, name, is_recipe, user_id)
+    for item in items:
+        action_add_item(item['id'], list_id, item['name'], item['quantity'])
+    return jsonify({"status": "OK"})
+
+@app.route('/update_list', methods=['POST'])
+def update_list():
+    data = request.get_json()
+    list_id = data['list_id']
+    name = data['name']
+    is_recipe = data['is_recipe']
+    user_id = data['user_id']
+    items = data['items']
+
+    # TODO add also to CRDT implementation
+
+    db = get_db()
+    db.execute('DELETE FROM ListItem WHERE ListId = ?', (list_id,))
+    db.commit()
+    for item in items:
+        action_add_item(item['id'], list_id, item['name'], item['quantity'], item['boughtQuantity'])
+    return jsonify({"status": "OK"})
 
 
-"""Server task, using a REQ socket to do load-balancing."""
-socket = zmq.Context().socket(zmq.REQ)
-socket.identity = u"Server-{}".format(server_id).encode("ascii")
-socket.connect("tcp://localhost:5560")
+@app.route('/get_list/<int:list_id>', methods=['GET'])
+def get_list(list_id):
+    response = action_get_list(list_id)
+    return str(response)
 
-# Tell broker we're ready for work
-socket.send(b"READY")
+@app.route('/get_lists', methods=['GET'])
+def get_lists():
+    response = action_get_lists()
+    return str(response)
 
-while True:
-    address, empty, request = socket.recv_multipart()
-    json_str = json.loads(request)
-    json_obj = json.loads(json_str)
+if __name__ == "__main__":
+    with app.app_context():
+        if not os.path.exists(app.config['DATABASE']):
+            init_db()
 
-    print("{}: {}".format(socket.identity.decode("ascii"), json_str))
-
-    if json_obj['action'] == 'add_item':
-        action_add_item(json_obj['item_id'], json_obj['list_id'], json_obj['item_name'], json_obj['quantity'])
-        socket.send_multipart([address, b"", b"Added item"]) 
-        
-    elif json_obj['action'] == 'update_item':
-        action_update_item(json_obj['item_id'], json_obj['boughtQuantity'])
-        socket.send_multipart([address, b"", b"OK"]) 
-        
-    elif json_obj['action'] == 'add_list':
-        action_add_list(json_obj['list_id'], json_obj['list_name'], json_obj['is_recipe'], json_obj['user_id'])
-        socket.send_multipart([address, b"", b"Added list"]) 
-        
-    elif json_obj['action'] == 'get_list':
-        response = action_get_list(json_obj['list_id'])
-        string = json.dumps(json.loads(response))
-        socket.send_multipart([address, b"", string.encode("ascii")])
-
-    elif json_obj['action'] == 'get_lists':
-        response = action_get_lists()
-        string = json.dumps(json.loads(response))
-        socket.send_multipart([address, b"", string.encode("ascii")])
-
-    else:
-        print("Invalid action")    
-        socket.send_multipart([address, b"", b"OK"])    
+    response = requests.post(f"http://localhost:4000/add_server", json={"server_port": PORT})
+    print(response)
+    app.run(debug=True, port=PORT, threaded=True)
+ 
     
     

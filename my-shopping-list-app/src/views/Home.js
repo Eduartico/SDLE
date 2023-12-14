@@ -54,7 +54,8 @@ const Home = () => {
       const newListResponse = await ApiService.addList(
         newListName,
         false,
-        newListUsernames + "," + user.id
+        newListUsernames + "," + user.id,
+        []
       );
 
       const newList = {

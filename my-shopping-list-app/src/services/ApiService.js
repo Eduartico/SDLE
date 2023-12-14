@@ -85,9 +85,9 @@ const ApiService = {
     }
   },
 
-  addList: async (name, isRecipe, usersId) => {
+  addList: async (name, isRecipe, usersId, items) => {
     const url = `${BASE_URL}/addList`;
-    const data = { name, isRecipe, usersId };
+    const data = { name, isRecipe, usersId, items};
   
     try {
       const response = await axios.post(url, data);
