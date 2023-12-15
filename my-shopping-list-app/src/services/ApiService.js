@@ -8,7 +8,7 @@ const ApiService = {
       const response = await axios.post(`${BASE_URL}/auth/login`, { username, password });
       return response.data;
     } catch (error) {
-      throw error; 
+      ////throw error; 
     }
   },
 
@@ -17,7 +17,7 @@ const ApiService = {
       const response = await axios.get(`${BASE_URL}/user/current`);
       return response.data;
     } catch (error) {
-      throw error; 
+      ////throw error; 
     }
   },
 
@@ -81,7 +81,7 @@ const ApiService = {
       const response = await axios.put(url, data);
       return response.data;
     } catch (error) {
-      throw error;
+      //throw error;
     }
   },
 
@@ -93,7 +93,7 @@ const ApiService = {
       const response = await axios.post(url, data);
       return response.data;
     } catch (error) {
-      throw error;
+      ////throw error;
     }
   },
 
@@ -105,7 +105,7 @@ const ApiService = {
       const response = await axios.post(url, data);
       return response.data;
     } catch (error) {
-      throw error;
+      //throw error;
     }
   },
 
@@ -114,7 +114,7 @@ const ApiService = {
       const response = await axios.get(`${BASE_URL}/user/recipes`);
       return response.data;
     } catch (error) {
-      throw error;
+      //throw error;
     }
   },
 
@@ -123,7 +123,7 @@ const ApiService = {
       const response = await axios.put(`${BASE_URL}/list/${listId}/item/${itemId}/buy`, { boughtQuantity });
       return response.data;
     } catch (error) {
-      throw error;
+      //throw error;
     }
   },
 
@@ -132,7 +132,7 @@ const ApiService = {
       const response = await axios.put(`${BASE_URL}/user/online`, { online });
       return response.data;
     } catch (error) {
-      throw error;
+      //throw error;
     }
   }
 };
